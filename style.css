@@ -1,0 +1,87 @@
+p {
+    height: 100%;
+    min-height: 100vh;
+    font-family:'Segoe UI';
+    color: #000000;
+    
+}
+
+body {
+    background-color: #f8f9fa; 
+    display: flex; 
+}
+.conteudo-principal {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #ffffff; 
+    margin-left: 250px; 
+}
+h1 {
+    color: #053c76;
+    margin-bottom: 20px;
+}
+.menu-lateral {
+    width: 250px; 
+    height: 100vh; 
+    position: fixed; 
+    top: 0;
+    left: 0;
+    background-color: #053c76; 
+    color: white;
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex; 
+    flex-direction: column;
+}
+.menu-lateral .logo {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 0 30px 0;
+}
+.cor-azul {
+    color: #ffffff; 
+}
+
+.cor-vermelha {
+    color: #d91427; 
+}
+
+.menu-lateral ul {
+    list-style: none; 
+    flex-grow: 1; 
+}
+
+.menu-lateral ul li a {
+    display: block;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: white;
+    transition: background-color 0.3s, color 0.3s;
+}
+.menu-lateral ul li a:hover {
+    background-color: #0056b3; 
+}
+.menu-lateral ul li a.ativo {
+    background-color: #ffffff; 
+    color: #007bff;
+    font-weight: bold;
+    border-left: 5px solid #dc3545; 
+}
+.menu-lateral .icone {
+    margin-right: 10px;
+}
+.menu-lateral .rodape-menu {
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 14px;
+}
+
+.menu-lateral .rodape-menu .emergencia {
+    display: block;
+    color: #dc3545; 
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 5px;
+}
