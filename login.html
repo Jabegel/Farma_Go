@@ -7,43 +7,48 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container mt-5">
+  <div class="container mt-5" style="max-width: 400px;">
     <h3 class="text-center mb-4">FarmaGo - Login</h3>
 
     <form id="loginForm">
+      <!-- Campo de LOGIN -->
       <div class="mb-3">
-        <label for="loginEmail" class="form-label">Login</label>
-        <input type="email" class="form-control" id="loginEmail" required>
+        <label for="loginUser" class="form-label">Login</label>
+        <input type="text" class="form-control" id="loginUser" name="login" required>
       </div>
 
+      <!-- Campo de SENHA -->
       <div class="mb-3">
         <label for="loginSenha" class="form-label">Senha</label>
-        <input type="password" class="form-control" id="loginSenha" required>
+        <input type="password" class="form-control" id="loginSenha" name="senha" required>
       </div>
 
+      <!-- Tipo de usuário -->
       <fieldset class="mb-3">
         <legend class="col-form-label pt-0">Tipo de Usuário</legend>
 
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="tipoUsuario" id="cliente" value="cliente" checked>
+          <input class="form-check-input" type="radio" name="tipo" id="cliente" value="cliente" checked>
           <label class="form-check-label" for="cliente">Usuário</label>
         </div>
 
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="tipoUsuario" id="farmacia" value="farmacia">
+          <input class="form-check-input" type="radio" name="tipo" id="farmacia" value="farmacia">
           <label class="form-check-label" for="farmacia">Farmácia</label>
         </div>
 
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="tipoUsuario" id="entregador" value="entregador">
+          <input class="form-check-input" type="radio" name="tipo" id="entregador" value="entregador">
           <label class="form-check-label" for="entregador">Entregador</label>
         </div>
       </fieldset>
 
+      <!-- Botão -->
       <button type="submit" class="btn btn-primary w-100">Entrar</button>
     </form>
   </div>
 
+  <!-- Script JS externo -->
   <script src="script.js"></script>
 </body>
 </html>

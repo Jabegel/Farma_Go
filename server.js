@@ -1,42 +1,46 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const mysql = require('mysql2');
 const cors = require('cors');
-const path = require('path');
-const db = require('./db');
 
 const app = express();
-const PORT = 3000;
+app.use(express.json());
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// ⚠️ Adicione exatamente isso:
+app.use(cors({
+  origin: "http://127.0.0.1:5500"
+}));
 
-// Servir arquivos estáticos (HTML, JS, CSS)
-app.use(express.static(__dirname));
+// Conexão com o banco
+const db = mysql.createConnection({
+  host: '127.0.0.1',
+  user: 'root',
+  password: '',
+  database: 'farmago'
+});
+
+db.connect(err => {
+  if (err) {
+    console.error('Erro ao conectar no MySQL:', err);
+  } else {
+    console.log('Conectado ao MySQL!');
+  }
+});
 
 // Rota de login
 app.post('/login', (req, res) => {
-  const { email, senha } = req.body;
+  const { login, senha, tipoUsuario } = req.body;
 
-  const sql = 'SELECT * FROM usuarios WHERE email = ? AND senha = ?';
-  db.query(sql, [email, senha], (err, results) => {
+  const query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ? AND tipo = ?';
+  db.query(query, [login, senha, tipoUsuario], (err, results) => {
     if (err) {
-      console.error('Erro na query:', err);
-      return res.status(500).json({ success: false, message: 'Erro no servidor.' });
+      console.error('Erro no banco:', err);
+      res.status(500).json({ message: 'Erro no servidor' });
+    } else if (results.length > 0) {
+      res.json({ success: true, tipo: tipoUsuario });
+    } else {
+      res.json({ success: false, message: 'Usuário ou senha inválidos' });
     }
-
-    if (results.length === 0) {
-      return res.status(401).json({ success: false, message: 'Usuário ou senha incorretos.' });
-    }
-
-    const usuario = results[0];
-    res.json({ success: true, tipo: usuario.tipo });
   });
 });
 
-// Servir página padrão
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
-});
-
-app.listen(PORT, () => console.log(`🚀 Servidor rodando em http://127.0.0.1:${PORT}`));
+app.listen(3000, () => console.log('Servidor rodando em http://127.0.0.1:3000'));
