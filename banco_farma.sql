@@ -15,5 +15,5 @@ INSERT INTO usuarios (nome, login, senha, tipo) VALUES
 ('João Cliente', 'joaocliente', '1234', 'cliente'),
 ('Farmácia São José', 'farmaciasj', '1234', 'farmacia'),
 ('Carlos Entregador', 'carlosent', '1234', 'entregador'),
-('Dra. Ana Paula', 'anafarma', 'farma123', 'farmaceutico'),
-('Max Admin', 'maxadmin', 'maxadmin123', 'admin');
+('Dra. Ana Paula', 'anafarma', '1234', 'farmaceutico'),
+('Max Admin', 'maxadmin', '1234', 'admin');
