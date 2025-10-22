@@ -30,18 +30,37 @@ db.connect(err => {
 app.post('/login', (req, res) => {
   const { login, senha, tipoUsuario } = req.body;
 
-  const query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ? AND tipo = ?';
-  db.query(query, [login, senha, tipoUsuario], (err, results) => {
+  let query;
+  let params;
+
+  // Se o tipo for informado (cliente, farmacia, entregador)
+  if (tipoUsuario) {
+    query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ? AND tipo = ?';
+    params = [login, senha, tipoUsuario];
+  } else {
+    // Se não for informado (admin ou farmaceutico)
+    query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ?';
+    params = [login, senha];
+  }
+
+  db.query(query, params, (err, results) => {
     if (err) {
       console.error('Erro no banco:', err);
-      res.status(500).json({ message: 'Erro no servidor' });
-    } else if (results.length > 0) {
-      res.json({ success: true, tipo: tipoUsuario });
-    } else {
-      res.json({ success: false, message: 'Usuário ou senha inválidos' });
+      return res.status(500).json({ message: 'Erro no servidor' });
     }
+
+    if (results.length === 0) {
+      return res.json({ success: false, message: 'Usuário ou senha incorretos!' });
+    }
+
+    const usuario = results[0];
+    console.log(`🔍 Login bem-sucedido: ${usuario.login} (${usuario.tipo})`);
+
+    // Retorna o tipo real do usuário
+    res.json({ success: true, tipo: usuario.tipo });
   });
 });
+
 
 // Inicializar servidor
 app.listen(3000, () => console.log('Servidor rodando em http://127.0.0.1:3000'));
