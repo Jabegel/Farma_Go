@@ -3,24 +3,22 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
   const login = document.getElementById("loginUser").value.trim();
   const senha = document.getElementById("loginSenha").value.trim();
-  const tipo = document.querySelector('input[name="tipo"]:checked').value; // pega o tipo selecionado
+  const tipoUsuario = document.querySelector('input[name="tipoUsuario"]:checked').value;
 
   try {
     const resposta = await fetch("http://127.0.0.1:3000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ login, senha, tipo })
+      body: JSON.stringify({ login, senha, tipoUsuario })
     });
 
     const data = await resposta.json();
 
-    // Se o backend retornar erro
     if (!data.success) {
       alert(data.message || "Usuário ou senha incorretos!");
       return;
     }
 
-    // Redireciona com base no tipo do usuário
     switch (data.tipo) {
       case "cliente":
         window.location.href = "./USUARIO/inicio_usuario.html";
@@ -40,7 +38,6 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       default:
         alert("Tipo de usuário inválido.");
     }
-
   } catch (error) {
     console.error("Erro no login:", error);
     alert("Erro ao conectar com o servidor.");
