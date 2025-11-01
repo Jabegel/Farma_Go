@@ -17,3 +17,20 @@ INSERT INTO usuarios (nome, login, senha, tipo) VALUES
 ('Carlos Entregador', 'carlosent', '1234', 'entregador'),
 ('Dra. Ana Paula', 'anafarma', '1234', 'farmaceutico'),
 ('Max Admin', 'maxadmin', '1234', 'admin');
+
+USE farmago;
+
+-- Cria nova tabela para cadastro detalhado
+CREATE TABLE IF NOT EXISTS cadastros (
+    id_cadastro INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    nome_exibicao VARCHAR(100) NOT NULL,
+    login_nome VARCHAR(50) NOT NULL UNIQUE,
+    cpf VARCHAR(14) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    data_nascimento DATE NOT NULL,
+    tipo_conta ENUM('cliente', 'entregador', 'farmacia') NOT NULL,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
