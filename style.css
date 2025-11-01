@@ -1,88 +1,115 @@
-p {
-    height: 100%;
-    min-height: 100vh;
-    font-family:'Segoe UI';
-    color: #000000;
-    
+/* ---------- TELA DE INTRODUÇÃO (index.html) ---------- */
+.intro-body {
+  background: linear-gradient(135deg, #007bff, #00b4d8);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
 }
 
+.intro-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+}
+
+.intro-card h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.intro-card p {
+  font-size: 1.1rem;
+  color: #e9ecef;
+  margin-bottom: 30px;
+}
+
+.btn-access {
+  background-color: #fff;
+  color: #007bff;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 12px 25px;
+  border: none;
+  transition: 0.3s;
+}
+
+.btn-access:hover {
+  background-color: #f1f1f1;
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  font-size: 3.5rem;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+footer {
+  position: absolute;
+  bottom: 20px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  width: 100%;
+}
+
+/* ---------- TELA DE LOGIN ---------- */
 body {
-    background-color: #f8f9fa; 
-    display: flex; 
-}
-.conteudo-principal {
-    flex-grow: 1;
-    padding: 20px;
-    background-color: #ffffff; 
-    margin-left: 250px; 
-}
-h1 {
-    color: #053c76;
-    margin-bottom: 20px;
-}
-.menu-lateral {
-    width: 250px; 
-    height: 100vh; 
-    position: fixed; 
-    top: 0;
-    left: 0;
-    background-color: #053c76; 
-    color: white;
-    padding-top: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    display: flex; 
-    flex-direction: column;
-}
-.menu-lateral .logo {
-    font-size: 24px;
-    font-weight: 900;
-    text-align: center;
-    padding: 10px 0 30px 0;
-    font-family: Geneva;
-}
-.cor-azul {
-    color: #ffffff; 
+  background-color: #f8f9fa;
 }
 
-.cor-vermelha {
-    color: #cd061a; 
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background-color: white;
 }
 
-.menu-lateral ul {
-    list-style: none; 
-    flex-grow: 1; 
+.password-container {
+  position: relative;
 }
 
-.menu-lateral ul li a {
-    display: block;
-    padding: 15px 20px;
-    text-decoration: none;
-    color: white;
-    transition: background-color 0.3s, color 0.3s;
-}
-.menu-lateral ul li a:hover {
-    background-color: #0056b3; 
-}
-.menu-lateral ul li a.ativo {
-    background-color: #ffffff; 
-    color: #007bff;
-    font-weight: bold;
-    border-left: 5px solid #dc3545; 
-}
-.menu-lateral .icone {
-    margin-right: 10px;
-}
-.menu-lateral .rodape-menu {
-    padding: 20px;
-    text-align: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    font-size: 14px;
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-0.1rem); /* 👁️ ajuste fino */
+  cursor: pointer;
+  color: #6c757d;
+  font-size: 1.1rem;
 }
 
-.menu-lateral .rodape-menu .emergencia {
-    display: block;
-    color: #dc3545; 
-    font-weight: bold;
-    font-size: 16px;
-    margin-top: 5px;
+.password-toggle:hover {
+  color: #0d6efd;
+}
+
+/* ---------- BOTÕES E LINKS ---------- */
+.btn-primary {
+  background-color: #0d6efd;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+a.text-decoration-none {
+  color: #0d6efd;
+  font-weight: 500;
+}
+
+a.text-decoration-none:hover {
+  text-decoration: underline;
 }

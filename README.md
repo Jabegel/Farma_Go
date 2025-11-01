@@ -1,5 +1,13 @@
 # marketplace_farmacia
-Market Place de Farmacia
+Para rodar o trabalho é necessario iniciar um servidor local (XAMP)
 
-João Gabriel Está no Projeto 2x 3x
-Ramyne está no prjeto
+Rodar todos os comandos SQL que estão em SRC/DB/banco_farma.sql
+
+Abrir o terminal ( " CTRL + SHIFT + ' " )
+
+Navegue até a pasta JS usando o comando cd ...
+
+Rode o comando node server.js
+
+Todos os acessos estão em DB/banco_farma.sql
+
