@@ -115,3 +115,61 @@ INSERT INTO compras (id_usuario, id_farmacia, item, quantidade) VALUES
 (1, 1, 'Dipirona 500mg', 2),
 (1, 2, 'Paracetamol 750mg', 1),
 (2, 1, 'Vitamina C 1g', 3);
+-- ========================================
+-- TABELA DE PRODUTOS
+-- ========================================
+CREATE TABLE IF NOT EXISTS produtos (
+    id_produto INT AUTO_INCREMENT PRIMARY KEY,
+    id_farmacia INT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(10,2) NOT NULL,
+    imagem VARCHAR(255),
+    estoque INT DEFAULT 0,
+    categoria VARCHAR(50),
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_farmacia) REFERENCES farmacias(id_farmacia)
+);
+
+-- Dados de exemplo de produtos
+INSERT INTO produtos (id_farmacia, nome, descricao, preco, imagem, estoque, categoria)
+VALUES
+(1, 'Dipirona 500mg', 'Analgésico e antitérmico em comprimidos', 9.90, 'imagens/dipirona.png', 100, 'Medicamentos'),
+(1, 'Vitamina C 1g', 'Suplemento vitamínico efervescente', 12.50, 'imagens/vitaminaC.png', 80, 'Vitaminas'),
+(2, 'Paracetamol 750mg', 'Analgésico e antitérmico', 8.50, 'imagens/paracetamol.png', 120, 'Medicamentos'),
+(3, 'Álcool em Gel 70%', 'Antisséptico para as mãos', 6.90, 'imagens/alcoolgel.png', 50, 'Higiene');
+
+-- ========================================
+-- TABELA DE CARRINHO
+-- ========================================
+CREATE TABLE IF NOT EXISTS carrinho (
+    id_carrinho INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('aberto', 'finalizado', 'cancelado') DEFAULT 'aberto',
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
+
+-- ========================================
+-- TABELA DE ITENS DO CARRINHO
+-- ========================================
+CREATE TABLE IF NOT EXISTS carrinho_itens (
+    id_item INT AUTO_INCREMENT PRIMARY KEY,
+    id_carrinho INT NOT NULL,
+    id_produto INT NOT NULL,
+    quantidade INT NOT NULL DEFAULT 1,
+    preco_unitario DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_carrinho) REFERENCES carrinho(id_carrinho) ON DELETE CASCADE,
+    FOREIGN KEY (id_produto) REFERENCES produtos(id_produto)
+);
+
+-- Dados de exemplo (simulação de carrinho)
+INSERT INTO carrinho (id_usuario, status) VALUES
+(1, 'aberto'),
+(1, 'finalizado');
+
+INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, preco_unitario)
+VALUES
+(1, 1, 2, 9.90),
+(1, 2, 1, 12.50),
+(2, 3, 1, 8.50);
