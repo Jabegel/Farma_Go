@@ -1,0 +1,41 @@
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Farma_go - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="center">
+  <div class="card">
+    <h1>Farma_go</h1>
+    <form id="loginForm">
+      <label>Login<input id="login" required></label>
+      <label>Senha<input id="senha" type="password" required></label>
+      <button type="submit">Entrar</button>
+    </form>
+    <p id="msg"></p>
+  </div>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const login = document.getElementById('login').value;
+  const senha = document.getElementById('senha').value;
+  const res = await fetch('/api/usuario/login', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({login, senha})
+  });
+  if(!res.ok){ document.getElementById('msg').innerText='Erro de login'; return; }
+  const user = await res.json();
+  // redirect based on type
+  if(user.tipo==='admin') window.location.href='SRC/MAX_ADMIN/inicio_admin.html';
+  else if(user.tipo==='cliente') window.location.href='SRC/USUARIO/inicio_usuario.html';
+  else if(user.tipo==='farmacia') window.location.href='SRC/FARMACIA/inicio_farmacia.html';
+  else if(user.tipo==='farmaceutico') window.location.href='SRC/FARMACEUTICO/inicio_farmaceutico.html';
+  else if(user.tipo==='entregador') window.location.href='SRC/ENTREGADOR/inicio_entregador.html';
+  else window.location.href='SRC/USUARIO/inicio_usuario.html';
+});
+</script>
+</body>
+</html>

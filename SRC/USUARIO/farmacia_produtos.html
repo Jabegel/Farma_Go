@@ -1,0 +1,19 @@
+
+<!doctype html><html><head><meta charset="utf-8"><title>Produtos</title><link rel="stylesheet" href="../../style.css"></head><body>
+<div class="card"><h2>Produtos da Farmácia (exemplo)</h2>
+<div id="produtos"></div>
+</div>
+<script>
+async function load(){
+  // example, farmacia id 1
+  const res = await fetch('/api/usuario/produtos/farmacia/1');
+  const prods = await res.json();
+  const el = document.getElementById('produtos');
+  if(!Array.isArray(prods)) return el.innerText = 'Nenhum produto';
+  el.innerHTML = prods.map(p=>`<div style="border-bottom:1px solid #eee;padding:8px"><b>${p.nome}</b> - R$ ${p.preco} <button onclick="add(${p.id_produto})">+Carrinho</button> <button onclick="fav(${p.id_produto})">Favoritar</button></div>`).join('');
+}
+async function add(prodId){ await fetch('/api/usuario/carrinho/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuarioId:1,produtoId:prodId})}); alert('adicionado'); }
+async function fav(prodId){ await fetch('/api/usuario/favoritos/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuarioId:1,produtoId:prodId})}); alert('favoritado'); }
+load();
+</script>
+</body></html>
