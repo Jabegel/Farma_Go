@@ -1,5 +1,15 @@
-Farma_go project
+# marketplace_farmacia
+Para rodar o trabalho é necessario iniciar um servidor local (XAMP)
 
+Rodar todos os comandos SQL que estão em SRC/DB/banco_farma.sql
 
-Nota: Não alterei seus arquivos originais em SRC/USUARIO e SRC/MAX_ADMIN.
-Endpoints adicionados em /SRC/api/usuario (favoritos, produtos, enderecos, pagamentos, carrinho) e upload/medical support.
+Abrir o terminal ( " CTRL + SHIFT + ' " )
+
+Navegue até a pasta JS usando o comando cd
+
+SRC/JS
+
+Rode o comando node server.js
+
+Todos os acessos estão em DB/banco_farma.sql
+

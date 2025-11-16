@@ -1,15 +1,28 @@
 {
-  "name": "farma_go_userbase",
+  "name": "marketplace_farmacia",
   "version": "1.0.0",
-  "main": "server.js",
+  "description": "Market Place de Farmacia",
+  "main": "db.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jabegel/marketplace_farmacia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jabegel/marketplace_farmacia/issues"
+  },
+  "homepage": "https://github.com/Jabegel/marketplace_farmacia#readme",
   "dependencies": {
-    "express": "^4.18.2",
-    "mysql2": "^3.3.0",
-    "body-parser": "^1.20.2",
+    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
-    "multer": "^1.4.5-lts.1"
+    "express": "^5.1.0",
+    "mysql2": "^3.15.3",
+    "node": "^25.1.0"
   }
 }
