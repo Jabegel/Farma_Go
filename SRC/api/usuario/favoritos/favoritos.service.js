@@ -5,7 +5,7 @@ exports.listar = async (usuarioId)=>{
   return rows;
 };
 exports.add = async (usuarioId, produtoId)=>{
-  await db.query('INSERT INTO favoritos (id_usuario, id_produto) VALUES (?, ?)', [usuarioId, produtoId]);
+  await db.query('INSERT IGNORE INTO favoritos (id_usuario, id_produto) VALUES (?, ?)', [usuarioId, produtoId]);
   return {ok:true};
 };
 exports.remove = async (usuarioId, produtoId)=>{

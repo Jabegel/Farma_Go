@@ -29,3 +29,13 @@ exports.editarUsuario = async (req,res)=>{
   try{ const atual = await service.editar(req.params.id, req.body); res.json(atual); }
   catch(err){ res.status(500).json({error:err.message}); }
 };
+
+exports.updateMedical = async (req,res)=>{
+  try{
+    const { bloodType, medicalNotes, allergies } = req.body;
+    try{ await require('./usuario.service').ensureMedicalColumns(); }catch(e){}
+    const id = req.params.id;
+    await require('./usuario.service').updateMedical(id, { bloodType, medicalNotes, allergies });
+    res.json({ ok:true });
+  }catch(err){ res.status(500).json({ error: err.message }); }
+};

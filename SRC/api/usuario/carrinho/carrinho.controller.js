@@ -9,3 +9,6 @@ exports.adicionarItem = async (req,res)=>{
 exports.removerItem = async (req,res)=>{
   try{ res.json(await svc.remove(req.body.usuarioId, req.body.itemId)); }catch(e){ res.status(500).json({error:e.message}); }
 };
+exports.finalizar = async (req,res)=>{
+  try{ res.json(await svc.finalizar(req.body.usuarioId)); }catch(e){ res.status(500).json({error:e.message}); }
+};

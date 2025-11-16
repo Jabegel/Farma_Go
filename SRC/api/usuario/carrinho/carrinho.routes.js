@@ -6,5 +6,6 @@ const ctrl = require('./carrinho.controller');
 router.get('/:usuarioId', ctrl.pegarCarrinho);
 router.post('/add', ctrl.adicionarItem);
 router.post('/remove', ctrl.removerItem);
+router.post('/finalizar', ctrl.finalizar);
 
 module.exports = router;

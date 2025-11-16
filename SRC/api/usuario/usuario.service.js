@@ -31,3 +31,20 @@ exports.editar = async (id, data)=>{
   await db.query('UPDATE usuarios SET '+fields.join(', ')+' WHERE id = ?', values);
   return this.pegar(id);
 };
+
+exports.ensureMedicalColumns = async ()=>{
+  const db = require('../../db/connection');
+  const queries = [
+    "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS bloodType VARCHAR(10) DEFAULT NULL",
+    "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS medicalNotes TEXT DEFAULT NULL",
+    "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS allergies TEXT DEFAULT NULL"
+  ];
+  for(const q of queries){
+    try{ await db.query(q); }catch(e){}
+  }
+};
+
+exports.updateMedical = async (id, data)=>{
+  const { bloodType, medicalNotes, allergies } = data;
+  await db.query('UPDATE usuarios SET bloodType = ?, medicalNotes = ?, allergies = ? WHERE id = ?', [bloodType || null, medicalNotes || null, allergies || null, id]);
+};

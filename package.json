@@ -1,5 +1,5 @@
 {
-  "name": "farma_go_generated",
+  "name": "farma_go_userbase",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
@@ -9,6 +9,7 @@
     "express": "^4.18.2",
     "mysql2": "^3.3.0",
     "body-parser": "^1.20.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1"
   }
 }

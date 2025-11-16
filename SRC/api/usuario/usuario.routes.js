@@ -8,6 +8,8 @@ router.get('/listar', controller.listarUsuarios);
 router.get('/:id', controller.pegarUsuario);
 router.post('/cadastrar', controller.cadastrarUsuario);
 router.put('/:id/editar', controller.editarUsuario);
+router.post('/:id/photo', require('./usuario.upload').uploadMiddleware, require('./usuario.upload').uploadPhoto);
+router.put('/:id/medical', controller.updateMedical);
 
 // mount submodules
 router.use('/favoritos', require('./favoritos/favoritos.routes'));

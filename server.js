@@ -6,10 +6,11 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use('/SRC/uploads', express.static(path.join(__dirname, 'SRC/uploads')));
 app.use(express.static(path.join(__dirname)));
 
-// mount usuario API
+// mount usuario API (will be created under SRC/api/usuario)
 app.use('/api/usuario', require('./SRC/api/usuario/usuario.routes'));
 
 // serve index
