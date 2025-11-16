@@ -25,7 +25,7 @@ function carregarProdutos() {
                 return;
             }
 
-            container.innerHTML = ""; // Limpar antes de adicionar
+            container.innerHTML = ""; // Limpa antes de adicionar
 
             produtos.forEach(produto => {
                 container.innerHTML += `
@@ -48,9 +48,8 @@ function carregarProdutos() {
         });
 }
 
-// Chamar a função ao abrir a página
+// Chamar ao carregar a página
 carregarProdutos();
-
 
 // ===============================
 // ADICIONAR AO CARRINHO

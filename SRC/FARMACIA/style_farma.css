@@ -1,0 +1,64 @@
+/* ================================
+   HEADER DA FARMÁCIA
+================================ */
+.farmacia-header {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.farmacia-header h2 {
+    font-size: 28px;
+    color: #333;
+}
+
+/* ================================
+   GRID DE PRODUTOS
+================================ */
+.produtos-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 22px;
+    margin-top: 25px;
+}
+
+/* ================================
+   CARD DO PRODUTO
+================================ */
+.card-produto {
+    background: #fff;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.card-produto:hover {
+    transform: scale(1.04);
+}
+
+.produto-img {
+    width: 130px;
+    height: 130px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+/* ================================
+   BOTÃO
+================================ */
+.btn-add {
+    margin-top: 12px;
+    padding: 10px 15px;
+    background: #0077ff;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-add:hover {
+    background: #0059c9;
+}
