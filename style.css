@@ -1,10 +1,4 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+
 /* ---------- TELA DE INTRODUÇÃO (index.html) ---------- */
 .intro-body {
   background: linear-gradient(135deg, #007bff, #00b4d8);
@@ -120,7 +114,7 @@ a.text-decoration-none {
 a.text-decoration-none:hover {
   text-decoration: underline;
 }
-=======
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: #f4f7f6;
@@ -183,7 +177,7 @@ body {
   border-radius: 5px;
 }
 
-=======
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: #f4f7f6;
@@ -246,8 +240,7 @@ body {
   border-radius: 5px;
 }
 
->>>>>>> Stashed changes
-=======
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: #f4f7f6;
@@ -310,8 +303,7 @@ body {
   border-radius: 5px;
 }
 
->>>>>>> Stashed changes
-=======
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: #f4f7f6;
@@ -374,8 +366,7 @@ body {
   border-radius: 5px;
 }
 
->>>>>>> Stashed changes
-=======
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: #f4f7f6;
@@ -438,8 +429,7 @@ body {
   border-radius: 5px;
 }
 
->>>>>>> Stashed changes
-=======
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: #f4f7f6;
@@ -502,8 +492,7 @@ body {
   border-radius: 5px;
 }
 
->>>>>>> Stashed changes
-=======
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: #f4f7f6;
@@ -566,7 +555,7 @@ body {
   border-radius: 5px;
 }
 
->>>>>>> Stashed changes
+
 /* Grid de Cartões (Farmácias ou Produtos) */
 .card-grid {
   display: grid;
@@ -710,29 +699,4 @@ body {
   border: 1px solid #ddd;
   border-radius: 5px;
   box-sizing: border-box;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 }
->>>>>>> Stashed changes
-=======
-}
->>>>>>> Stashed changes
-=======
-}
->>>>>>> Stashed changes
-=======
-}
->>>>>>> Stashed changes
-=======
-}
->>>>>>> Stashed changes
-=======
-}
->>>>>>> Stashed changes
-=======
-}
->>>>>>> Stashed changes

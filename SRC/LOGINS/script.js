@@ -23,7 +23,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
     // Redirecionamento conforme tipo real do banco
     switch (data.tipo) {
       case "cliente":
-        window.location.href = "./USUARIO/inicio_usuario.html";
+        window.location.href = "../USUARIO/inicio_usuario.html";
         break;
       case "farmacia":
         window.location.href = "./FARMACIA/inicio_farmacia.html";
