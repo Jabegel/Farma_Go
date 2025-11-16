@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS produtos (
 INSERT INTO produtos (id_farmacia, nome, descricao, preco, imagem, estoque, categoria)
 VALUES
 (1, 'Dipirona 500mg', 'Analgésico e antitérmico em comprimidos', 9.90, 'imagens/dipirona.png', 100, 'Medicamentos'),
-(1, 'Vitamina C 1g', 'Suplemento vitamínico efervescente', 12.50, 'imagens/vitaminaC.png', 80, 'Vitaminas'),
+(2, 'Vitamina C 1g', 'Suplemento vitamínico efervescente', 12.50, 'imagens/vitaminaC.png', 80, 'Vitaminas'),
 (2, 'Paracetamol 750mg', 'Analgésico e antitérmico', 8.50, 'imagens/paracetamol.png', 120, 'Medicamentos'),
 (3, 'Álcool em Gel 70%', 'Antisséptico para as mãos', 6.90, 'imagens/alcoolgel.png', 50, 'Higiene');
 
