@@ -6,8 +6,8 @@ const farmaciaId = params.get("id");
 
 // Se não tiver ID, mostra erro
 if (!farmaciaId) {
-    document.querySelector(".produtos-container").innerHTML =
-        "<p>Erro: Nenhuma farmácia selecionada.</p>";
+    const el = document.querySelector(".produtos-container");
+    if (el) el.innerHTML = "<p>Erro: Nenhuma farmácia selecionada.</p>";
     throw new Error("ID da farmácia não encontrado");
 }
 
@@ -16,9 +16,17 @@ if (!farmaciaId) {
 // ===============================
 function carregarProdutos() {
     fetch(`/api/produtos?farmacia=${farmaciaId}`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Resposta do servidor não OK');
+            return res.json();
+        })
         .then(produtos => {
             const container = document.querySelector(".produtos-container");
+
+            if (!container) {
+                console.error("Container .produtos-container não encontrado");
+                return;
+            }
 
             if (!produtos || produtos.length === 0) {
                 container.innerHTML = "<p>Esta farmácia ainda não cadastrou produtos.</p>";
@@ -28,23 +36,37 @@ function carregarProdutos() {
             container.innerHTML = ""; // Limpa antes de adicionar
 
             produtos.forEach(produto => {
-                container.innerHTML += `
-                    <div class="card-produto">
-                        <img src="${produto.imagem}" class="produto-img">
+                const precoFormat = Number(produto.preco).toFixed(2);
+                const imagem = produto.imagem ? produto.imagem : '/SRC/IMG/placeholder.png';
+
+                const card = document.createElement('article');
+                card.className = 'card card-produto';
+
+                card.innerHTML = `
+                    <img src="${imagem}" class="card-image produto-img" alt="${produto.nome}">
+                    <div class="card-content">
                         <h3>${produto.nome}</h3>
-                        <p>${produto.descricao}</p>
-                        <p><strong>R$ ${produto.preco.toFixed(2)}</strong></p>
-                        <button class="btn-add" onclick="adicionarCarrinho(${produto.id_produto})">
-                            Adicionar ao Carrinho
-                        </button>
+                        <p>${produto.descricao || ''}</p>
+                        <p class="product-price"><strong>R$ ${precoFormat}</strong></p>
+                        <button class="btn btn-primary btn-add" data-id="${produto.id_produto}">Adicionar ao Carrinho</button>
                     </div>
                 `;
+
+                container.appendChild(card);
+            });
+
+            // adicionar evento aos botões
+            document.querySelectorAll('.btn-add').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.getAttribute('data-id');
+                    adicionarCarrinho(Number(id));
+                });
             });
         })
         .catch(err => {
             console.error("Erro ao carregar produtos:", err);
-            document.querySelector(".produtos-container").innerHTML =
-                "<p>Erro ao carregar produtos.</p>";
+            const container = document.querySelector(".produtos-container");
+            if (container) container.innerHTML = "<p>Erro ao carregar produtos.</p>";
         });
 }
 
@@ -55,14 +77,22 @@ carregarProdutos();
 // ADICIONAR AO CARRINHO
 // ===============================
 function adicionarCarrinho(idProduto) {
+    // aqui assumimos que o usuário já está logado e o backend determina o id_usuario pelo token/sessão
     fetch("/api/carrinho/adicionar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_produto: idProduto })
+        body: JSON.stringify({ id_produto: idProduto, quantidade: 1 })
     })
     .then(res => res.json())
     .then(data => {
-        alert(data.mensagem || "Produto adicionado ao carrinho!");
+        if (data && data.success) {
+            alert(data.message || "Produto adicionado ao carrinho!");
+        } else {
+            alert(data.message || "Não foi possível adicionar ao carrinho.");
+        }
     })
-    .catch(err => console.error("Erro ao adicionar ao carrinho:", err));
+    .catch(err => {
+        console.error("Erro ao adicionar ao carrinho:", err);
+        alert("Erro ao adicionar ao carrinho.");
+    });
 }

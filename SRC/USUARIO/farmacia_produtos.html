@@ -35,15 +35,19 @@
 const params = new URLSearchParams(window.location.search);
 const farmaciaId = params.get("id");
 
-fetch(`/api/farmacia/${farmaciaId}`)
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("nomeFarmacia").innerText =
-            data.nome || "Farmácia";
-    })
-    .catch(() => {
-        document.getElementById("nomeFarmacia").innerText = "Farmácia";
-    });
+if (!farmaciaId) {
+    document.getElementById("nomeFarmacia").innerText = "Farmácia";
+} else {
+    fetch(`/api/farmacia/${farmaciaId}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("nomeFarmacia").innerText =
+                data.nome || "Farmácia";
+        })
+        .catch(() => {
+            document.getElementById("nomeFarmacia").innerText = "Farmácia";
+        });
+}
 </script>
 
 <!-- Carrega os produtos dinamicamente -->
