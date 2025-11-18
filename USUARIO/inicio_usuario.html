@@ -62,42 +62,34 @@
   </main>
 <script>
     function toggleFavorito(event, nome, imagem, descricao) {
-        event.preventDefault(); // Impede de abrir a farmácia
-        event.stopPropagation(); // Impede conflitos de clique
+        event.preventDefault(); // Trava o link da farmácia
+        event.stopPropagation(); // Trava cliques indesejados
 
-        // 1. Pega a lista ou cria uma nova
+        // 1. Pega a memória
         let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
         
-        // 2. Verifica se já existe pelo nome
+        // 2. Verifica se já existe
         const index = favoritos.findIndex(item => item.nome === nome);
         const btn = event.currentTarget;
 
         if (index !== -1) {
-            // SE JÁ TEM: Remove
+            // REMOVE (sem aviso)
             favoritos.splice(index, 1);
             btn.classList.remove('ativo');
-            alert("Removido dos favoritos!"); // Aviso temporário para testar
         } else {
-            // SE NÃO TEM: Adiciona
+            // ADICIONA (sem aviso)
             favoritos.push({ nome, imagem, descricao });
             btn.classList.add('ativo');
-            alert("Salvo nos favoritos!"); // Aviso temporário para testar
         }
 
-        // 3. Grava na memória do navegador
+        // 3. Salva
         localStorage.setItem('meusFavoritos', JSON.stringify(favoritos));
     }
 
-    // Mantém os corações vermelhos ao recarregar a página
+    // Mantém vermelho ao recarregar
     document.addEventListener('DOMContentLoaded', () => {
-        let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
-        // Procura todos os botões de favorito na tela
-        document.querySelectorAll('.btn-fav').forEach(btn => {
-            // O botão precisa ter um atributo onclick com o nome da farmácia para isso funcionar perfeitamente,
-            // mas por enquanto, o visual ao clicar já vai resolver seu teste.
-        });
+        // Código opcional de verificação visual
     });
 </script>
-IMPORTANTE: Verifique
 </body>
 </html>
