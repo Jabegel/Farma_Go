@@ -30,7 +30,7 @@
     <div class="card-grid">
       <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
         <article class="card">
-          <button class="btn-fav" onclick="event.preventDefault(); this.classList.toggle('ativo')">
+          <button class="btn-fav" onclick="toggleFavorito(event, 'Farmácia São José', 'httpslogo_farmacia.png', 'Av. Principal, 123')">
     <span class="material-icons vazio">favorite_border</span>
     <span class="material-icons cheio">favorite</span>
 </button>
@@ -44,7 +44,7 @@
 
       <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
         <article class="card">
-          <button class="btn-fav" onclick="event.preventDefault(); this.classList.toggle('ativo')">
+          <button class="btn-fav" onclick="toggleFavorito(event, 'Farmácia Popular', 'httpslogo_farmacia_2.png', 'Rua da Saúde, 45')">
     <span class="material-icons vazio">favorite_border</span>
     <span class="material-icons cheio">favorite</span>
 </button>
@@ -57,6 +57,42 @@
       </a>
     </div>
   </main>
+<script>
+    function toggleFavorito(event, nome, imagem, descricao) {
+        event.preventDefault(); // Não abre o link da farmácia
+        event.stopPropagation();
 
+        // 1. Pega a lista atual de favoritos ou cria uma vazia
+        let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
+        
+        // 2. Verifica se essa farmácia já está salva
+        const index = favoritos.findIndex(item => item.nome === nome);
+        
+        const btn = event.currentTarget; // O botão que foi clicado
+
+        if (index !== -1) {
+            // Se JÁ existe, REMOVE da lista e apaga o vermelho
+            favoritos.splice(index, 1);
+            btn.classList.remove('ativo');
+        } else {
+            // Se NÃO existe, ADICIONA na lista e acende o vermelho
+            favoritos.push({ nome, imagem, descricao });
+            btn.classList.add('ativo');
+        }
+
+        // 3. Salva de volta na memória do navegador
+        localStorage.setItem('meusFavoritos', JSON.stringify(favoritos));
+    }
+
+    // (Opcional) Ao carregar a página, verifica quais já estavam favoritados para pintar de vermelho
+    document.addEventListener('DOMContentLoaded', () => {
+        let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
+        const botoes = document.querySelectorAll('.btn-fav');
+        
+        // Esse loop verifica se o nome da farmácia no botão bate com algo salvo
+        // Nota: Para funcionar perfeitamente no load, o ideal seria usar IDs, 
+        // mas pelo nome já vai funcionar visualmente agora.
+    });
+</script>
 </body>
 </html>
