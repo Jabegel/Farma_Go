@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Meus Favoritos</title>
+    <link rel="stylesheet" href="style.css"> <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> </head>
+<body>
+
+    <nav>
+        <a href="inicio.html">Voltar ao Início</a>
+    </nav>
+
+    <h2 style="text-align: center; margin-top: 20px;">Meus Itens Salvos</h2>
+    
+    <div class="grid-favoritos">
+        
+        <div class="card-produto">
+            <button class="btn-fav ativo" onclick="this.classList.toggle('ativo')">
+                <span class="material-icons vazio">favorite_border</span>
+                <span class="material-icons cheio">favorite</span>
+            </button>
+            <img src="exemplo.jpg" alt="Foto"> <h3>Produto Exemplo</h3>
+            <p>R$ 50,00</p>
+            <button>Comprar</button>
+        </div>
+
+    </div>
+
+</body>
+</html>

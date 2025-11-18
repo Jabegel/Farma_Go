@@ -313,3 +313,46 @@ a.text-decoration-none:hover {
   border-radius: 5px;
   box-sizing: border-box;
 }
+/* 1. Layout da Página 'Meus Favoritos' */
+.grid-favoritos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* 2. Comportamento do Card (Para segurar o botão no lugar) */
+.card, .card-produto {
+    position: relative; 
+}
+
+/* 3. Estilo do Botão de Coração */
+.btn-fav {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 100; /* Importante: Faz o botão ficar "em cima" do link da farmácia */
+    transition: transform 0.2s;
+}
+
+.btn-fav:hover {
+    transform: scale(1.1); /* Aumenta um pouquinho ao passar o mouse */
+}
+
+/* Ícones */
+.btn-fav .material-icons {
+    font-size: 30px;
+    color: #ccc; /* Cor cinza padrão */
+    filter: drop-shadow(0 0 2px white); /* Contorno leve caso a foto seja escura */
+}
+
+/* Lógica de Troca (Vazio vs Cheio) */
+.btn-fav .cheio { display: none; }
+.btn-fav .vazio { display: block; }
+
+/* Quando estiver ATIVO (Vermelho) */
+.btn-fav.ativo .cheio { display: block; color: #ff4757; }
+.btn-fav.ativo .vazio { display: none; }

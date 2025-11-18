@@ -6,6 +6,7 @@
   <title>FarmaGo - Início</title>
   
   <link rel="stylesheet" href="../style.css"> 
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
 
@@ -29,6 +30,10 @@
     <div class="card-grid">
       <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
         <article class="card">
+          <button class="btn-fav" onclick="event.preventDefault(); this.classList.toggle('ativo')">
+    <span class="material-icons vazio">favorite_border</span>
+    <span class="material-icons cheio">favorite</span>
+</button>
           <img src="httpslogo_farmacia.png" alt="Farmácia São José" class="card-image">
           <div class="card-content">
             <h3>Farmácia São José</h3>
@@ -39,6 +44,10 @@
 
       <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
         <article class="card">
+          <button class="btn-fav" onclick="event.preventDefault(); this.classList.toggle('ativo')">
+    <span class="material-icons vazio">favorite_border</span>
+    <span class="material-icons cheio">favorite</span>
+</button>
           <img src="httpslogo_farmacia_2.png" alt="Farmácia Popular" class="card-image">
           <div class="card-content">
             <h3>Farmácia Popular</h3>
