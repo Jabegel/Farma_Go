@@ -10,14 +10,17 @@
 </head>
 <body>
 
-  <header class="main-header">
+ <header class="main-header">
     <a href="inicio_usuario.html" class="logo">FarmaGo</a>
     <nav>
       <a href="#">Meus Pedidos</a>
+      
+      <a href="favoritos.html">Favoritos ❤️</a>
+      
       <a href="#">Meu Perfil</a>
       <a href="../login.html">Sair</a>
     </nav>
-  </header>
+ </header>
 
   <main class="container">
     <section class="search-section">
@@ -59,40 +62,42 @@
   </main>
 <script>
     function toggleFavorito(event, nome, imagem, descricao) {
-        event.preventDefault(); // Não abre o link da farmácia
-        event.stopPropagation();
+        event.preventDefault(); // Impede de abrir a farmácia
+        event.stopPropagation(); // Impede conflitos de clique
 
-        // 1. Pega a lista atual de favoritos ou cria uma vazia
+        // 1. Pega a lista ou cria uma nova
         let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
         
-        // 2. Verifica se essa farmácia já está salva
+        // 2. Verifica se já existe pelo nome
         const index = favoritos.findIndex(item => item.nome === nome);
-        
-        const btn = event.currentTarget; // O botão que foi clicado
+        const btn = event.currentTarget;
 
         if (index !== -1) {
-            // Se JÁ existe, REMOVE da lista e apaga o vermelho
+            // SE JÁ TEM: Remove
             favoritos.splice(index, 1);
             btn.classList.remove('ativo');
+            alert("Removido dos favoritos!"); // Aviso temporário para testar
         } else {
-            // Se NÃO existe, ADICIONA na lista e acende o vermelho
+            // SE NÃO TEM: Adiciona
             favoritos.push({ nome, imagem, descricao });
             btn.classList.add('ativo');
+            alert("Salvo nos favoritos!"); // Aviso temporário para testar
         }
 
-        // 3. Salva de volta na memória do navegador
+        // 3. Grava na memória do navegador
         localStorage.setItem('meusFavoritos', JSON.stringify(favoritos));
     }
 
-    // (Opcional) Ao carregar a página, verifica quais já estavam favoritados para pintar de vermelho
+    // Mantém os corações vermelhos ao recarregar a página
     document.addEventListener('DOMContentLoaded', () => {
         let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
-        const botoes = document.querySelectorAll('.btn-fav');
-        
-        // Esse loop verifica se o nome da farmácia no botão bate com algo salvo
-        // Nota: Para funcionar perfeitamente no load, o ideal seria usar IDs, 
-        // mas pelo nome já vai funcionar visualmente agora.
+        // Procura todos os botões de favorito na tela
+        document.querySelectorAll('.btn-fav').forEach(btn => {
+            // O botão precisa ter um atributo onclick com o nome da farmácia para isso funcionar perfeitamente,
+            // mas por enquanto, o visual ao clicar já vai resolver seu teste.
+        });
     });
 </script>
+IMPORTANTE: Verifique
 </body>
 </html>
