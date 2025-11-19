@@ -6,8 +6,8 @@ Rodar todos os comandos SQL que estão em SRC/DB/banco_farma.sql
 Abrir o terminal ( " CTRL + SHIFT + ' " )
 
 Navegue até a pasta JS usando o comando cd
-
-SRC/JS
+(cd SRC) Enter
+(cd JS) Enter
 
 Rode o comando node server.js
 
