@@ -1,72 +1,308 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FarmaGo - Checkout</title>
-  <link rel="stylesheet" href="../../style.css"> </head>
-<body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmaGo - Finalizar Pedido</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+        .main-header { background-color: #007BFF; color: white; }
+        .checkout-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        @media (min-width: 1024px) { .checkout-layout { grid-template-columns: 2fr 1fr; } }
+        .checkout-summary li { padding: 0.5rem 0; display: flex; justify-content: space-between; align-items: center; }
+        .checkout-summary .total { border-top: 1px dashed #ccc; margin-top: 1rem; padding-top: 1rem; font-size: 1.25rem; font-weight: 700; }
+        .input-radio-group input[type="radio"]:checked + label { background-color: #e0f2fe; border-color: #007BFF; }
+        
+        /* Animação suave ao remover */
+        .fade-out { opacity: 0; transition: opacity 0.5s; }
+    </style>
+</head>
+<body class="antialiased">
 
-  <header class="main-header">
-    <a href="inicio_usuario.html" class="logo">FarmaGo</a>
-    <nav>
-      <a href="../../login.html">Sair</a>
-    </nav>
-  </header>
+    <header class="main-header shadow-md p-4 flex justify-between items-center">
+        <div class="logo text-2xl font-bold">FarmaGo</div>
+        <nav><a href="/" class="text-white hover:text-blue-200 transition">Voltar</a></nav>
+    </header>
 
-  <main class="container">
-    <h2>Finalizar Pedido</h2>
-    
-    <div class="checkout-layout">
-      
-      <section class="checkout-form">
-        <h3>Endereço de Entrega</h3>
-        <div class="form-group">
-          <input type="radio" id="end1" name="endereco" checked>
-          <label for="end1">Casa (Rua das Flores, 123, Centro)</label>
+    <main class="container mx-auto p-4 lg:p-8">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">Finalizar Pedido</h2>
+        
+        <div class="checkout-layout">
+            <section class="checkout-form bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">1. Endereço de Entrega</h3>
+                <div class="space-y-3 input-radio-group">
+                    <div class="flex items-center">
+                        <input type="radio" id="end1" name="endereco" checked class="hidden">
+                        <label for="end1" class="w-full p-4 border rounded-lg cursor-pointer transition hover:bg-gray-50 flex justify-between items-center text-gray-700">
+                            Casa <span class="text-sm text-gray-500">(Rua das Flores, 123)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-700 mt-8 mb-4 border-b pb-2">2. Forma de Pagamento</h3>
+                <div class="space-y-3 input-radio-group">
+                    <div class="flex items-center">
+                        <input type="radio" id="pag_pix" name="pagamento" value="pix" checked class="hidden">
+                        <label for="pag_pix" class="w-full p-4 border rounded-lg cursor-pointer transition hover:bg-gray-50 flex justify-between items-center text-gray-700">
+                            Pix <span class="text-sm text-gray-500">(Instantâneo)</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="pag_credito" name="pagamento" value="credito" class="hidden">
+                        <label for="pag_credito" class="w-full p-4 border rounded-lg cursor-pointer transition hover:bg-gray-50 flex justify-between items-center text-gray-700">
+                            Cartão de Crédito <span class="text-sm text-gray-500">(Parcelamento)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="payment-details-credito" class="mt-6 p-4 border border-blue-400 bg-blue-50 rounded-lg hidden">
+                    <h4 class="text-lg font-medium text-blue-800 mb-3">Opções de Parcelamento</h4>
+                    <select id="installments" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option>Selecione...</option>
+                    </select>
+                    <p class="text-sm text-gray-600 mt-2">Total no cartão: <strong id="total-parcelamento">R$ 0,00</strong></p>
+                </div>
+            </section>
+
+            <aside class="checkout-summary bg-white p-6 rounded-xl shadow-lg h-fit">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Resumo</h3>
+                
+                <ul id="cart-items" class="text-gray-600 text-sm min-h-[100px]">
+                    <li class="text-center py-4 text-gray-400">Carregando itens...</li>
+                </ul>
+
+                <ul class="text-gray-600 mt-4">
+                    <li id="subtotal-display"><span>Subtotal</span> <strong>R$ 0,00</strong></li>
+                    <li id="delivery-tax-display" data-tax="5.00"><span>Frete</span> <strong class="text-green-600">R$ 5,00</strong></li>
+                    <li class="total text-gray-900"><span>Total</span> <strong id="final-total">R$ 0,00</strong></li>
+                </ul>
+                <button id="confirm-order-btn" class="mt-6 w-full py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition duration-300">
+                    Confirmar Pedido
+                </button>
+            </aside>
         </div>
-        <div class="form-group">
-          <input type="radio" id="end2" name="endereco">
-          <label for="end2">Trabalho (Av. Principal, 456, Bloco B)</label>
-        </div>
-        <a href="/SRC/USUARIO/enredeco_usuario.html">+ Adicionar novo endereço</a>
+    </main>
 
-        <h3 style="margin-top: 2rem;">Forma de Pagamento</h3>
-        <div class="form-group">
-          <input type="radio" id="pag1" name="pagamento" checked>
-          <label for="pag1">Pix</label>
-        </div>
-        <div class="form-group">
-          <input type="radio" id="pag2" name="pagamento">
-          <label for="pag2">Cartão de Crédito (na entrega)</label>
-        </div>
-      </section>
+    <script>
+        // ==========================================
+        // CONFIGURAÇÕES E ELEMENTOS
+        // ==========================================
+        const paymentRadios = document.querySelectorAll('input[name="pagamento"]');
+        const creditDetailsSection = document.getElementById('payment-details-credito');
+        const installmentsSelect = document.getElementById('installments');
+        const finalTotalDisplay = document.getElementById('final-total');
+        const totalParcelamentoDisplay = document.getElementById('total-parcelamento');
+        const confirmButton = document.getElementById('confirm-order-btn');
+        const subtotalDisplay = document.getElementById('subtotal-display').querySelector('strong');
+        const cartList = document.getElementById('cart-items');
+        
+        const ID_USUARIO_SIMULADO = 1; // O mesmo do backend
+        let currentOptions = [];
+        let cartTotal = 0;
 
-      <aside class="checkout-summary">
-        <h3>Resumo do Pedido</h3>
-        <ul>
-          <li>
-            <span>Dipirona 500mg (1x)</span>
-            <strong>R$ 12,50</strong>
-          </li>
-          <li>
-            <span>Protetor Solar FPS 30 (1x)</span>
-            <strong>R$ 45,90</strong>
-          </li>
-          <li>
-            <span>Taxa de Entrega</span>
-            <strong>R$ 5,00</strong>
-          </li>
-          <li class="total">
-            <span>Total</span>
-            <strong>R$ 63,40</strong>
-          </li>
-        </ul>
-        <a href="pedido_confirmado.html" class="btn btn-primary">Confirmar Pedido</a>
-      </aside>
+        // ==========================================
+        // FUNÇÕES DO CARRINHO (REMOVER E LISTAR)
+        // ==========================================
 
-    </div>
-  </main>
+        // 1. Carregar itens do Backend
+        async function carregarItens() {
+            try {
+                const response = await fetch(`/api/carrinho/${ID_USUARIO_SIMULADO}`);
+                const data = await response.json();
 
+                cartList.innerHTML = ''; // Limpa lista
+
+                if (data.success && data.itens.length > 0) {
+                    data.itens.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = "border-b border-dashed border-gray-200 pb-2 mb-2 flex justify-between items-center group";
+                        li.dataset.price = item.subtotal_item;
+
+                        // HTML com botão de remover
+                        li.innerHTML = `
+                            <div class="flex items-center gap-3 w-full">
+                                <button onclick="removerItem(${item.id_item})" 
+                                        class="text-gray-400 hover:text-red-500 transition p-1 rounded-full hover:bg-red-50" 
+                                        title="Remover item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                                <div class="flex justify-between w-full">
+                                    <span>${item.quantidade}x ${item.nome}</span>
+                                    <strong>R$ ${parseFloat(item.subtotal_item).toFixed(2).replace('.', ',')}</strong>
+                                </div>
+                            </div>
+                        `;
+                        cartList.appendChild(li);
+                    });
+                    updateTotals(); // Atualiza preços na tela
+                } else {
+                    cartList.innerHTML = '<li class="text-center text-gray-400 py-4">Carrinho vazio.</li>';
+                    updateTotals();
+                }
+            } catch (error) {
+                console.error(error);
+                cartList.innerHTML = '<li class="text-red-500 text-center">Erro ao carregar.</li>';
+            }
+        }
+
+        // 2. Função de Remover (Chama a API DELETE)
+        async function removerItem(idItem) {
+            if(!confirm("Deseja remover este item?")) return;
+
+            try {
+                const response = await fetch(`/api/carrinho/remove/${idItem}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    // Recarrega a lista para atualizar tudo
+                    carregarItens();
+                } else {
+                    alert("Erro ao remover: " + data.message);
+                }
+            } catch (error) {
+                alert("Erro de conexão ao remover item.");
+            }
+        }
+
+        // ==========================================
+        // CÁLCULOS E PARCELAMENTO
+        // ==========================================
+
+        function calculateBaseTotal() {
+            let subtotal = 0;
+            // Soma os itens que vieram do banco (agora estão na tela)
+            document.querySelectorAll('#cart-items li').forEach(item => {
+                if(item.dataset.price) {
+                    subtotal += parseFloat(item.dataset.price);
+                }
+            });
+            return subtotal;
+        }
+
+        function updateTotals() {
+            const subtotal = calculateBaseTotal();
+            const freight = parseFloat(document.getElementById('delivery-tax-display').dataset.tax);
+            const total = subtotal > 0 ? subtotal + freight : 0; // Se vazio, total é 0
+
+            subtotalDisplay.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+            
+            // Atualiza visualização padrão
+            const totalFormatted = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            finalTotalDisplay.textContent = totalFormatted;
+            confirmButton.textContent = subtotal > 0 ? `Confirmar (${totalFormatted})` : 'Carrinho Vazio';
+            
+            // Desabilita botão se vazio
+            confirmButton.disabled = subtotal === 0;
+
+            // Se crédito estiver selecionado, recalcula parcelas com novo valor
+            const isCredit = document.querySelector('input[name="pagamento"][value="credito"]').checked;
+            if (isCredit && subtotal > 0) {
+                fetchInstallments(total);
+            }
+        }
+
+        async function fetchInstallments(totalValue) {
+            try {
+                installmentsSelect.innerHTML = '<option>Calculando...</option>';
+                const response = await fetch('/api/checkout/parcelamento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ total: totalValue })
+                });
+                const data = await response.json();
+                if (data.success) renderInstallments(data.options);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function renderInstallments(options) {
+            currentOptions = options;
+            installmentsSelect.innerHTML = '';
+            options.forEach((opt, index) => {
+                const option = document.createElement('option');
+                option.value = opt.installments;
+                option.textContent = opt.info;
+                if (index === 0) option.selected = true;
+                installmentsSelect.appendChild(option);
+            });
+            updateDisplayWithInterest();
+        }
+
+        function updateDisplayWithInterest() {
+            const selectedInstallment = parseInt(installmentsSelect.value);
+            const option = currentOptions.find(o => o.installments === selectedInstallment);
+            if (option) {
+                const formattedTotal = `R$ ${option.total.replace('.', ',')}`;
+                totalParcelamentoDisplay.textContent = formattedTotal;
+                finalTotalDisplay.textContent = formattedTotal;
+                confirmButton.textContent = `Confirmar (${formattedTotal})`;
+            }
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const subtotal = calculateBaseTotal();
+                const freight = parseFloat(document.getElementById('delivery-tax-display').dataset.tax);
+                const total = subtotal + freight;
+
+                if (e.target.value === 'credito') {
+                    creditDetailsSection.classList.remove('hidden');
+                    if(subtotal > 0) fetchInstallments(total);
+                } else {
+                    creditDetailsSection.classList.add('hidden');
+                    updateTotals(); // Reseta para valor à vista
+                }
+            });
+        });
+
+        installmentsSelect.addEventListener('change', updateDisplayWithInterest);
+
+        // Finalizar Pedido
+        confirmButton.addEventListener('click', async () => {
+            if(calculateBaseTotal() === 0) return; // Proteção extra
+
+            const textoOriginal = confirmButton.innerText;
+            confirmButton.innerText = "Processando...";
+            confirmButton.disabled = true;
+
+            try {
+                const response = await fetch('/api/carrinho/finalizar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_usuario: ID_USUARIO_SIMULADO })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert("Sucesso! " + data.message);
+                    window.location.reload(); // Recarrega para ver o carrinho vazio
+                } else {
+                    alert("Erro: " + data.message);
+                    confirmButton.innerText = textoOriginal;
+                    confirmButton.disabled = false;
+                }
+            } catch (error) {
+                alert("Erro de conexão.");
+                confirmButton.innerText = textoOriginal;
+                confirmButton.disabled = false;
+            }
+        });
+
+        // INICIALIZAÇÃO
+        window.onload = () => {
+            carregarItens(); // Começa carregando do banco
+        };
+    </script>
 </body>
 </html>
