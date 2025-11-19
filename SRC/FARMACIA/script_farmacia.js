@@ -15,7 +15,7 @@ if (!farmaciaId) {
 // BUSCAR OS PRODUTOS DA FARMÁCIA
 // ===============================
 function carregarProdutos() {
-    fetch(`/api/produtos?farmacia=${farmaciaId}`)
+    fetch(`http://127.0.0.1:3000/api/produtos?farmacia=${farmaciaId}`)
         .then(res => {
             if (!res.ok) throw new Error('Resposta do servidor não OK');
             return res.json();
@@ -48,7 +48,9 @@ function carregarProdutos() {
                         <h3>${produto.nome}</h3>
                         <p>${produto.descricao || ''}</p>
                         <p class="product-price"><strong>R$ ${precoFormat}</strong></p>
-                        <button class="btn btn-primary btn-add" data-id="${produto.id_produto}">Adicionar ao Carrinho</button>
+                        <button class="btn btn-primary btn-add" data-id="${produto.id_produto}">
+                            Adicionar ao Carrinho
+                        </button>
                     </div>
                 `;
 
@@ -77,22 +79,32 @@ carregarProdutos();
 // ADICIONAR AO CARRINHO
 // ===============================
 function adicionarCarrinho(idProduto) {
-    // aqui assumimos que o usuário já está logado e o backend determina o id_usuario pelo token/sessão
-    fetch("/api/carrinho/adicionar", {
+
+    const idUsuario = localStorage.getItem("id_usuario");
+    if (!idUsuario) {
+        alert("Você precisa estar logado para adicionar ao carrinho!");
+        return;
+    }
+
+    fetch(`http://127.0.0.1:3000/api/carrinho/adicionar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_produto: idProduto, quantidade: 1 })
+        body: JSON.stringify({
+            id_usuario: Number(idUsuario),
+            id_produto: idProduto,
+            quantidade: 1
+        })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data && data.success) {
-            alert(data.message || "Produto adicionado ao carrinho!");
-        } else {
-            alert(data.message || "Não foi possível adicionar ao carrinho.");
-        }
-    })
-    .catch(err => {
-        console.error("Erro ao adicionar ao carrinho:", err);
-        alert("Erro ao adicionar ao carrinho.");
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.success) {
+                alert(data.message || "Produto adicionado ao carrinho!");
+            } else {
+                alert(data.message || "Não foi possível adicionar ao carrinho.");
+            }
+        })
+        .catch(err => {
+            console.error("Erro ao adicionar ao carrinho:", err);
+            alert("Erro ao adicionar ao carrinho.");
+        });
 }

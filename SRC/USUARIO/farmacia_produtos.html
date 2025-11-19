@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,49 +10,51 @@
     <link rel="stylesheet" href="../../style.css">
 
     <!-- CSS da farmácia -->
-    <link rel="stylesheet" href="../FARMACIA/style_farma.css">
+    <link rel="stylesheet" href="../../FARMACIA/style_farma.css">
 </head>
+
 <body>
 
-<header class="main-header">
-    <a href="inicio_usuario.html" class="logo">FarmaGo</a>
-    <nav>
-        <a href="carrinho_checkout.html">Meu Carrinho</a>
-        <a href="../../login.html">Sair</a>
-    </nav>
-</header>
+    <header class="main-header">
+        <a href="inicio_usuario.html" class="logo">FarmaGo</a>
+        <nav>
+            <a href="carrinho_checkout.html">Meu Carrinho</a>
+            <a href="../../login.html">Sair</a>
+        </nav>
+    </header>
 
-<main class="container">
+    <main class="container">
 
-    <h2 id="nomeFarmacia">Carregando farmácia...</h2>
+        <h2 id="nomeFarmacia">Carregando farmácia...</h2>
 
-    <!-- AQUI OS PRODUTOS DO BANCO VÃO SER CRIADOS -->
-    <div class="produtos-container"></div>
+        <!-- AQUI OS PRODUTOS DO BANCO VÃO SER CRIADOS -->
+        <div class="produtos-container"></div>
 
-</main>
+    </main>
 
-<!-- Carregar nome da farmácia -->
-<script>
-const params = new URLSearchParams(window.location.search);
-const farmaciaId = params.get("id");
+    <!-- Carregar nome da farmácia -->
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const farmaciaId = params.get("id");
 
-if (!farmaciaId) {
-    document.getElementById("nomeFarmacia").innerText = "Farmácia";
-} else {
-    fetch(`/api/farmacia/${farmaciaId}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("nomeFarmacia").innerText =
-                data.nome || "Farmácia";
-        })
-        .catch(() => {
+        if (!farmaciaId) {
             document.getElementById("nomeFarmacia").innerText = "Farmácia";
-        });
-}
-</script>
+        } else {
+            fetch(`/api/farmacia/${farmaciaId}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("nomeFarmacia").innerText =
+                        data.nome || "Farmácia";
+                })
+                .catch(() => {
+                    document.getElementById("nomeFarmacia").innerText = "Farmácia";
+                });
+        }
+    </script>
 
-<!-- Carrega os produtos dinamicamente -->
-<script src="../FARMACIA/script_farmacia.js"></script>
+    <!-- Carrega os produtos dinamicamente -->
+    <script src="../../FARMACIA/script_farmacia.js"></script>
 
 </body>
+
 </html>
