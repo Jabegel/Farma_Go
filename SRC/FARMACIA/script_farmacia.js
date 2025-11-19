@@ -1,79 +1,83 @@
 // ===============================
 // PEGAR O ID DA FARMÁCIA DA URL
 // ===============================
-const params = new URLSearchParams(window.location.search);
-const farmaciaId = params.get("id");
+document.addEventListener("DOMContentLoaded", () => {
 
-// Se não tiver ID, mostra erro
-if (!farmaciaId) {
-    const el = document.querySelector(".produtos-container");
-    if (el) el.innerHTML = "<p>Erro: Nenhuma farmácia selecionada.</p>";
-    throw new Error("ID da farmácia não encontrado");
+    const params = new URLSearchParams(window.location.search);
+    const farmaciaId = params.get("id");
+
+    if (!farmaciaId) {
+        document.querySelector(".produtos-container").innerHTML =
+            "<p>Erro: Nenhuma farmácia selecionada.</p>";
+        return;
+    }
+
+    carregarNomeFarmacia(farmaciaId);
+    carregarProdutos(farmaciaId);
+});
+
+// ===============================
+// BUSCAR NOME DA FARMÁCIA
+// ===============================
+function carregarNomeFarmacia(farmaciaId) {
+    fetch(`http://127.0.0.1:3000/api/farmacia/${farmaciaId}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("nomeFarmacia").innerText =
+                data.nome || "Farmácia";
+        })
+        .catch(err => {
+            console.error("Erro ao carregar nome:", err);
+            document.getElementById("nomeFarmacia").innerText = "Farmácia";
+        });
 }
 
 // ===============================
 // BUSCAR OS PRODUTOS DA FARMÁCIA
 // ===============================
-function carregarProdutos() {
+function carregarProdutos(farmaciaId) {
+
     fetch(`http://127.0.0.1:3000/api/produtos?farmacia=${farmaciaId}`)
-        .then(res => {
-            if (!res.ok) throw new Error('Resposta do servidor não OK');
-            return res.json();
-        })
+        .then(res => res.json())
         .then(produtos => {
+
             const container = document.querySelector(".produtos-container");
 
-            if (!container) {
-                console.error("Container .produtos-container não encontrado");
-                return;
-            }
-
-            if (!produtos || produtos.length === 0) {
+            if (!produtos.length) {
                 container.innerHTML = "<p>Esta farmácia ainda não cadastrou produtos.</p>";
                 return;
             }
 
-            container.innerHTML = ""; // Limpa antes de adicionar
+            container.innerHTML = "";
 
             produtos.forEach(produto => {
-                const precoFormat = Number(produto.preco).toFixed(2);
-                const imagem = produto.imagem ? produto.imagem : '/SRC/IMG/placeholder.png';
 
-                const card = document.createElement('article');
-                card.className = 'card card-produto';
+                const card = `
+                    <article class="card card-produto">
+                        <img src="${produto.imagem || '/SRC/IMG/placeholder.png'}" 
+                             class="card-image produto-img">
 
-                card.innerHTML = `
-                    <img src="${imagem}" class="card-image produto-img" alt="${produto.nome}">
-                    <div class="card-content">
-                        <h3>${produto.nome}</h3>
-                        <p>${produto.descricao || ''}</p>
-                        <p class="product-price"><strong>R$ ${precoFormat}</strong></p>
-                        <button class="btn btn-primary btn-add" data-id="${produto.id_produto}">
-                            Adicionar ao Carrinho
-                        </button>
-                    </div>
+                        <div class="card-content">
+                            <h3>${produto.nome}</h3>
+                            <p>${produto.descricao || ""}</p>
+                            <p class="product-price"><strong>R$ ${Number(produto.preco).toFixed(2)}</strong></p>
+
+                            <button class="btn btn-primary btn-add" onclick="adicionarCarrinho(${produto.id_produto})">
+                                Adicionar ao Carrinho
+                            </button>
+                        </div>
+                    </article>
                 `;
 
-                container.appendChild(card);
-            });
-
-            // adicionar evento aos botões
-            document.querySelectorAll('.btn-add').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.currentTarget.getAttribute('data-id');
-                    adicionarCarrinho(Number(id));
-                });
+                container.innerHTML += card;
             });
         })
         .catch(err => {
-            console.error("Erro ao carregar produtos:", err);
-            const container = document.querySelector(".produtos-container");
-            if (container) container.innerHTML = "<p>Erro ao carregar produtos.</p>";
+            console.error(err);
+            document.querySelector(".produtos-container").innerHTML =
+                "<p>Erro ao carregar produtos.</p>";
         });
 }
-
-// Chamar ao carregar a página
-carregarProdutos();
 
 // ===============================
 // ADICIONAR AO CARRINHO
@@ -81,12 +85,13 @@ carregarProdutos();
 function adicionarCarrinho(idProduto) {
 
     const idUsuario = localStorage.getItem("id_usuario");
+
     if (!idUsuario) {
-        alert("Você precisa estar logado para adicionar ao carrinho!");
+        alert("Você precisa estar logado!");
         return;
     }
 
-    fetch(`http://127.0.0.1:3000/api/carrinho/adicionar`, {
+    fetch("http://127.0.0.1:3000/api/carrinho/adicionar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -97,14 +102,10 @@ function adicionarCarrinho(idProduto) {
     })
         .then(res => res.json())
         .then(data => {
-            if (data && data.success) {
-                alert(data.message || "Produto adicionado ao carrinho!");
-            } else {
-                alert(data.message || "Não foi possível adicionar ao carrinho.");
-            }
+            alert(data.message || "Item adicionado!");
         })
         .catch(err => {
-            console.error("Erro ao adicionar ao carrinho:", err);
+            console.error("Erro ao adicionar:", err);
             alert("Erro ao adicionar ao carrinho.");
         });
 }
