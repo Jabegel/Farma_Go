@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmaGo - Meus Favoritos</title>
+  <link rel="stylesheet" href="../style.css"> <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+ <header class="main-header">
+    <a href="inicio_usuario.html" class="logo">FarmaGo</a>
+    
+    <nav>
+      <a href="inicio_usuario.html">Voltar ao Início</a>
+      
+      <a href="../login.html">Sair</a>
+    </nav>
+</header>
+
+  <main class="container" style="padding: 20px;">
+    <h2>Minhas Farmácias Favoritas ❤️</h2>
+    
+    <div id="lista-favoritos" class="card-grid">
+       </div>
+
+    <p id="msg-vazio" style="display:none; text-align:center; margin-top:50px;">
+        Você ainda não tem favoritos. Volte ao início e clique no coração!
+    </p>
+  </main>
+
+  <script>
+    const container = document.getElementById('lista-favoritos');
+    const msgVazio = document.getElementById('msg-vazio');
+    
+    // 1. Ler a memória
+    let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
+
+    // 2. Se estiver vazio, avisa o usuário
+    if (favoritos.length === 0) {
+        msgVazio.style.display = 'block';
+    } else {
+        // 3. Para cada item salvo, cria o HTML do card
+        favoritos.forEach(item => {
+            
+            // Cria o HTML igual ao do inicio
+            const cardHTML = `
+                <article class="card">
+                    <img src="${item.imagem}" alt="${item.nome}" class="card-image">
+                    <div class="card-content">
+                        <h3>${item.nome}</h3>
+                        <p>${item.descricao}</p>
+                        <button onclick="removerFavorito('${item.nome}')" style="margin-top:10px; padding:5px; background:#ff4757; color:white; border:none; border-radius:4px; cursor:pointer;">
+                            Remover dos Favoritos
+                        </button>
+                    </div>
+                </article>
+            `;
+            
+            container.innerHTML += cardHTML;
+        });
+    }
+
+    // Função para remover item direto dessa tela
+    function removerFavorito(nomeParaRemover) {
+        let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
+        // Filtra mantendo apenas os que NÃO são o que queremos remover
+        let novaLista = favoritos.filter(item => item.nome !== nomeParaRemover);
+        // Salva e recarrega a página
+        localStorage.setItem('meusFavoritos', JSON.stringify(novaLista));
+        location.reload(); 
+    }
+  </script>
+
+</body>
+</html>

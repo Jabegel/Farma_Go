@@ -9,14 +9,14 @@
 </head>
 <body>
 
-  <header class="main-header">
+ <header class="main-header">
     <a href="inicio_usuario.html" class="logo">FarmaGo</a>
     <nav>
       <a href="/SRC/USUARIO/carrinho_checkout.html">Meus Pedidos</a>
       <a href="/SRC/USUARIO/perfil_usuario.html">Meu Perfil</a>
       <a href="../../login.html">Sair</a>
     </nav>
-  </header>
+ </header>
 
   <main class="container">
     <section class="search-section">
@@ -29,6 +29,10 @@
     <div class="card-grid">
       <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
         <article class="card">
+          <button class="btn-fav" onclick="toggleFavorito(event, 'Farmácia São José', 'httpslogo_farmacia.png', 'Av. Principal, 123')">
+    <span class="material-icons vazio">favorite_border</span>
+    <span class="material-icons cheio">favorite</span>
+</button>
           <img src="httpslogo_farmacia.png" alt="Farmácia São José" class="card-image">
           <div class="card-content">
             <h3>Farmácia São José</h3>
@@ -39,6 +43,10 @@
 
       <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
         <article class="card">
+          <button class="btn-fav" onclick="toggleFavorito(event, 'Farmácia Popular', 'httpslogo_farmacia_2.png', 'Rua da Saúde, 45')">
+    <span class="material-icons vazio">favorite_border</span>
+    <span class="material-icons cheio">favorite</span>
+</button>
           <img src="httpslogo_farmacia_2.png" alt="Farmácia Popular" class="card-image">
           <div class="card-content">
             <h3>Farmácia Popular</h3>
@@ -48,6 +56,36 @@
       </a>
     </div>
   </main>
+<script>
+    function toggleFavorito(event, nome, imagem, descricao) {
+        event.preventDefault(); // Trava o link da farmácia
+        event.stopPropagation(); // Trava cliques indesejados
 
+        // 1. Pega a memória
+        let favoritos = JSON.parse(localStorage.getItem('meusFavoritos')) || [];
+        
+        // 2. Verifica se já existe
+        const index = favoritos.findIndex(item => item.nome === nome);
+        const btn = event.currentTarget;
+
+        if (index !== -1) {
+            // REMOVE (sem aviso)
+            favoritos.splice(index, 1);
+            btn.classList.remove('ativo');
+        } else {
+            // ADICIONA (sem aviso)
+            favoritos.push({ nome, imagem, descricao });
+            btn.classList.add('ativo');
+        }
+
+        // 3. Salva
+        localStorage.setItem('meusFavoritos', JSON.stringify(favoritos));
+    }
+
+    // Mantém vermelho ao recarregar
+    document.addEventListener('DOMContentLoaded', () => {
+        // Código opcional de verificação visual
+    });
+</script>
 </body>
 </html>
