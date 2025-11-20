@@ -7,31 +7,24 @@ if (!usuario) {
     window.location.href = "/SRC/LOGINS/login.html";
 }
 
-
 // ============================================
-// PEGAR ID DA FARMÁCIA PELA URL
+// PEGAR ID DA FARMÁCIA
 // ============================================
 const url = new URLSearchParams(window.location.search);
 const farmaciaId = url.get("id");
 
-
 // ============================================
-// CARREGAR PRODUTOS DA FARMÁCIA
+// CARREGAR PRODUTOS
 // ============================================
 async function carregarProdutos() {
-
     const lista = document.getElementById("listaProdutos");
 
-    const req = await fetch(
-        `http://127.0.0.1:3000/api/produtos?farmacia=${farmaciaId}`
-    );
-
+    const req = await fetch(`http://127.0.0.1:3000/api/produtos?farmacia=${farmaciaId}`);
     const produtos = await req.json();
 
-    lista.innerHTML = ""; // limpar antes
+    lista.innerHTML = "";
 
     produtos.forEach(prod => {
-
         lista.innerHTML += `
             <div class="produto-card">
 
@@ -41,7 +34,7 @@ async function carregarProdutos() {
                     <h3>${prod.nome}</h3>
 
                     <button class="fav-btn" onclick="toggleFavorito(${prod.id_produto})">
-                        ❤️
+                        🤍
                     </button>
                 </div>
 
@@ -59,12 +52,10 @@ async function carregarProdutos() {
     pintarFavoritos();
 }
 
-
 // ============================================
-// FAVORITOS (LOCALSTORAGE)
+// FAVORITOS LOCALSTORAGE
 // ============================================
 function toggleFavorito(id_produto) {
-
     let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
     if (favoritos.includes(id_produto)) {
@@ -77,9 +68,7 @@ function toggleFavorito(id_produto) {
     pintarFavoritos();
 }
 
-
 function pintarFavoritos() {
-
     const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
     document.querySelectorAll(".fav-btn").forEach(btn => {
@@ -95,12 +84,10 @@ function pintarFavoritos() {
     });
 }
 
-
 // ============================================
-// ADICIONAR AO CARRINHO
+// CARRINHO
 // ============================================
 function adicionarCarrinho(id_produto) {
-
     fetch("http://127.0.0.1:3000/api/carrinho/adicionar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,7 +99,6 @@ function adicionarCarrinho(id_produto) {
 
     alert("Adicionado ao carrinho!");
 }
-
 
 // ============================================
 // INICIAR
