@@ -1,14 +1,18 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const path = require('path');
+const multer = require('multer'); // npm i multer
 
 const app = express();
 app.use(express.json());
-
-// Permitir requisições do frontend
 app.use(cors({
   origin: "http://127.0.0.1:5500"
 }));
+
+// servir arquivos estáticos de uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Conexão com o banco
 const db = mysql.createConnection({
@@ -64,6 +68,22 @@ app.post('/login', (req, res) => {
     });
   });
 });
+
+// =========================
+//  UPLOAD DE ARQUIVOS
+// =========================
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, 'uploads'));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const nome = `user_${Date.now()}${ext}`;
+    cb(null, nome);
+  }
+});
+const upload = multer({ storage });
+
 
 /* ============================================================
    CADASTRO
@@ -518,6 +538,143 @@ app.post("/api/pedido/finalizar", (req, res) => {
             );
         }
     );
+});
+
+
+/* ============================================================
+   PERFIL DO USUÁRIO
+   ============================================================ */
+
+// Buscar dados do usuário
+app.get("/api/usuario/:id", (req, res) => {
+  const id = req.params.id;
+
+  db.query(
+    `SELECT id, nome, apelido, email, tipo, 
+            DATE(data_nascimento) AS data_nascimento,
+            alergias, obs_medicas, foto_perfil
+     FROM usuarios WHERE id = ?`,
+    [id],
+    (err, rows) => {
+      if (err) return res.status(500).json({ success:false, message:"Erro no servidor." });
+      res.json(rows[0] || {});
+    }
+  );
+});
+
+// Atualizar dados básicos
+app.put("/api/usuario/atualizar", (req, res) => {
+  const { id_usuario, nome, apelido, data_nascimento } = req.body;
+
+  if (!id_usuario) {
+    return res.json({ success:false, message:"Usuário inválido." });
+  }
+
+  db.query(
+    `UPDATE usuarios 
+     SET nome = ?, apelido = ?, data_nascimento = ?
+     WHERE id = ?`,
+    [nome || null, apelido || null, data_nascimento || null, id_usuario],
+    (err) => {
+      if (err) return res.status(500).json({ success:false, message:"Erro ao atualizar dados." });
+      res.json({ success:true });
+    }
+  );
+});
+
+// Atualizar infos médicas
+app.put("/api/usuario/medico", (req, res) => {
+  const { id_usuario, alergias, obs_medicas } = req.body;
+
+  if (!id_usuario) {
+    return res.json({ success:false, message:"Usuário inválido." });
+  }
+
+  db.query(
+    `UPDATE usuarios 
+     SET alergias = ?, obs_medicas = ?
+     WHERE id = ?`,
+    [alergias || null, obs_medicas || null, id_usuario],
+    (err) => {
+      if (err) return res.status(500).json({ success:false, message:"Erro ao salvar informações médicas." });
+      res.json({ success:true });
+    }
+  );
+});
+
+// Upload de foto de perfil
+app.post("/api/usuario/foto", upload.single("foto"), (req, res) => {
+  const id_usuario = req.body.id_usuario;
+  if (!id_usuario || !req.file) {
+    return res.json({ success:false, message:"Dados inválidos." });
+  }
+
+  const caminho = `uploads/${req.file.filename}`;
+
+  db.query(
+    `UPDATE usuarios SET foto_perfil = ? WHERE id = ?`,
+    [caminho, id_usuario],
+    (err) => {
+      if (err) return res.status(500).json({ success:false, message:"Erro ao salvar foto." });
+      res.json({ success:true, foto:caminho });
+    }
+  );
+});
+
+/* ============================================================
+   CARTÕES DO USUÁRIO
+   ============================================================ */
+
+// Listar cartões
+app.get("/api/cartoes/:id_usuario", (req, res) => {
+  const id = req.params.id_usuario;
+
+  db.query(
+    `SELECT * FROM cartoes WHERE id_usuario = ? ORDER BY criado_em DESC`,
+    [id],
+    (err, rows) => {
+      if (err) return res.status(500).json({ success:false, message:"Erro ao buscar cartões." });
+      res.json(rows);
+    }
+  );
+});
+
+// Adicionar cartão
+app.post("/api/cartoes/adicionar", (req, res) => {
+  const { id_usuario, nome_impresso, numero_mascarado, bandeira, validade_mes, validade_ano } = req.body;
+
+  if (!id_usuario || !nome_impresso || !numero_mascarado) {
+    return res.json({ success:false, message:"Dados inválidos." });
+  }
+
+  db.query(
+    `INSERT INTO cartoes 
+       (id_usuario, nome_impresso, numero_mascarado, bandeira, validade_mes, validade_ano)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [id_usuario, nome_impresso, numero_mascarado, bandeira || null, validade_mes || null, validade_ano || null],
+    (err) => {
+      if (err) return res.status(500).json({ success:false, message:"Erro ao salvar cartão." });
+      res.json({ success:true });
+    }
+  );
+});
+
+// Remover cartão
+app.delete("/api/cartoes/remover", (req, res) => {
+  const { id_cartao, id_usuario } = req.body;
+
+  if (!id_cartao || !id_usuario) {
+    return res.json({ success:false, message:"Dados inválidos." });
+  }
+
+  db.query(
+    `DELETE FROM cartoes WHERE id_cartao = ? AND id_usuario = ?`,
+    [id_cartao, id_usuario],
+    (err) => {
+      if (err) return res.status(500).json({ success:false, message:"Erro ao remover cartão." });
+      res.json({ success:true });
+    }
+  );
 });
 
 

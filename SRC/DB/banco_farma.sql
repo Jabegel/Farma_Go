@@ -177,3 +177,26 @@ INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, preco_unitario)
 (1, 1, 2, 9.90),
 (1, 2, 1, 12.50),
 (2, 3, 1, 8.50);
+
+
+
+-- Campos extras no usuário
+ALTER TABLE usuarios
+  ADD COLUMN apelido VARCHAR(100) NULL AFTER nome,
+  ADD COLUMN data_nascimento DATE NULL AFTER email,
+  ADD COLUMN alergias TEXT NULL,
+  ADD COLUMN obs_medicas TEXT NULL,
+  ADD COLUMN foto_perfil VARCHAR(255) NULL;
+
+-- Tabela de cartões do usuário
+CREATE TABLE IF NOT EXISTS cartoes (
+    id_cartao INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    nome_impresso VARCHAR(100) NOT NULL,
+    numero_mascarado VARCHAR(25) NOT NULL,
+    bandeira VARCHAR(30),
+    validade_mes TINYINT,
+    validade_ano SMALLINT,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
