@@ -20,6 +20,13 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       return;
     }
 
+    // ⭐ SALVAR O USUÁRIO AQUI ⭐
+    localStorage.setItem("usuarioLogado", JSON.stringify({
+      id: data.id_usuario,
+      nome: data.nome,
+      tipo: data.tipo
+    }));
+
     // Redirecionamento conforme tipo real do banco
     switch (data.tipo) {
       case "cliente":
