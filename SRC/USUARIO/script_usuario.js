@@ -3,8 +3,9 @@ const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
 
 if (!usuario) {
   alert("Você precisa estar logado!");
-  window.location.href = "../../LOGINS/login.html";
+  window.location.href = "../LOGINS/login.html";
 }
+
 
 // ⭐ 2. Função de compra
 async function comprarItem(idFarmacia, nomeItem) {

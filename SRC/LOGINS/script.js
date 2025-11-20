@@ -22,7 +22,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
     // ⭐ SALVAR LOGIN AQUI ⭐
     localStorage.setItem("usuarioLogado", JSON.stringify({
-      id: data.id,
+      id: data.id_usuario,
       nome: data.nome,
       tipo: data.tipo
     }));
