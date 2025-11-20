@@ -354,6 +354,82 @@ app.delete('/api/carrinho/removerItem', removerItemHandler);
 app.delete('/api/carrinho/remover', removerItemHandler);
 
 /* ============================================================
+   ENDEREÇOS — ADICIONAR
+   ============================================================ */
+app.post('/api/enderecos/adicionar', (req, res) => {
+    const { id_usuario, cep, rua, numero, bairro, cidade, estado, complemento } = req.body;
+
+    if (!id_usuario || !cep || !rua || !numero || !bairro || !cidade || !estado) {
+        return res.json({ success: false, message: "Dados incompletos." });
+    }
+
+    db.query(`
+        INSERT INTO enderecos 
+        (id_usuario, cep, rua, numero, bairro, cidade, estado, complemento)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `, [id_usuario, cep, rua, numero, bairro, cidade, estado, complemento || ""],
+        (err) => {
+            if (err) return res.json({ success: false, message: "Erro ao salvar endereço." });
+            return res.json({ success: true, message: "Endereço cadastrado com sucesso!" });
+        });
+});
+
+
+/* ============================================================
+   ENDEREÇOS — LISTAR DO USUÁRIO
+   ============================================================ */
+app.get('/api/enderecos/:id_usuario', (req, res) => {
+    db.query(`
+        SELECT * FROM enderecos 
+        WHERE id_usuario = ?
+        ORDER BY id_endereco DESC
+    `, [req.params.id_usuario],
+        (err, rows) => {
+            if (err) return res.json({ success: false, message: "Erro ao buscar endereços." });
+            res.json(rows);
+        }
+    );
+});
+
+
+/* ============================================================
+   ENDEREÇOS — REMOVER
+   ============================================================ */
+app.delete('/api/enderecos/remover', (req, res) => {
+    const { id_endereco, id_usuario } = req.body;
+
+    if (!id_endereco || !id_usuario)
+        return res.json({ success: false, message: "Dados inválidos." });
+
+    db.query(`
+        DELETE FROM enderecos 
+        WHERE id_endereco = ? AND id_usuario = ?
+    `, [id_endereco, id_usuario],
+        (err, result) => {
+            if (err) return res.json({ success: false, message: "Erro ao remover endereço." });
+
+            res.json({ success: true, message: "Endereço removido." });
+        }
+    );
+});
+
+
+/* ============================================================
+   ENDEREÇOS — DETALHAR
+   ============================================================ */
+app.get('/api/endereco/:id_endereco', (req, res) => {
+    db.query(`
+        SELECT * FROM enderecos WHERE id_endereco = ?
+    `, [req.params.id_endereco],
+        (err, rows) => {
+            if (err) return res.json({ success: false });
+            res.json(rows[0] || {});
+        }
+    );
+});
+
+
+/* ============================================================
    INICIAR SERVIDOR
    ============================================================ */
 app.listen(3000, () => {
