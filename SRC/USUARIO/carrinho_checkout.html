@@ -31,15 +31,31 @@
         </div>
         <a href="/SRC/USUARIO/enredeco_usuario.html">+ Adicionar novo endereço</a>
 
+        
         <h3 style="margin-top: 2rem;">Forma de Pagamento</h3>
-        <div class="form-group">
-          <input type="radio" id="pag1" name="pagamento" checked>
-          <label for="pag1">Pix</label>
+        
+        <div class="form-group payment-options">
+          <input type="radio" id="pag_pix" name="pagamento" value="pix" checked>
+          <label for="pag_pix">Pix</label>
         </div>
-        <div class="form-group">
-          <input type="radio" id="pag2" name="pagamento">
-          <label for="pag2">Cartão de Crédito (na entrega)</label>
+        
+        <div class="form-group payment-options">
+          <input type="radio" id="pag_cartao" name="pagamento" value="cartao">
+          <label for="pag_cartao">Cartão de Crédito (na entrega)</label>
         </div>
+        
+        <div class="form-group installment-group" id="parcelamento-area" style="display: none;">
+          <label for="installments">Selecione o Parcelamento:</label>
+          <select id="installments" class="form-control">
+            <option>Calculando parcelas...</option> 
+          </select>
+        </div>
+        
+        <div class="form-group" id="cartao-info" style="display: none;">
+            <label for="card-number">Número do Cartão:</label>
+            <input type="text" id="card-number" class="form-control" placeholder="**** **** **** 1234">
+        </div>
+        
       </section>
 
       <aside class="checkout-summary">
@@ -67,6 +83,7 @@
 
     </div>
   </main>
-
+  
+  <script src="script.js"></script> 
 </body>
 </html>
