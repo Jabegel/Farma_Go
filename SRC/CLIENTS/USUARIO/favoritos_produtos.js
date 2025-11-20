@@ -55,18 +55,28 @@ async function carregarProdutos() {
 // ============================================
 // FAVORITOS LOCALSTORAGE
 // ============================================
-function toggleFavorito(id_produto) {
+function toggleFavorito(produto) {
     let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
-    if (favoritos.includes(id_produto)) {
-        favoritos = favoritos.filter(id => id !== id_produto);
+    const existe = favoritos.some(f => f.id_produto === produto.id_produto);
+
+    if (existe) {
+        // Remover
+        favoritos = favoritos.filter(f => f.id_produto !== produto.id_produto);
     } else {
-        favoritos.push(id_produto);
+        // Adicionar objeto completo
+        favoritos.push({
+            id_produto: produto.id_produto,
+            nome: produto.nome,
+            imagem: produto.imagem,
+            preco: produto.preco
+        });
     }
 
     localStorage.setItem("favoritos", JSON.stringify(favoritos));
     pintarFavoritos();
 }
+
 
 function pintarFavoritos() {
     const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];

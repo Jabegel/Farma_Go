@@ -759,15 +759,15 @@ body {
 
 .fav-btn {
     position: absolute;
-    right: 12px;
-    top: 12px;
+    right: 10px;
+    top: 10px;
     background: none;
     border: none;
-    font-size: 26px;
+    font-size: 24px;
     cursor: pointer;
     color: #888;
-    transition: 0.2s;
 }
+
 
 .fav-btn:hover {
     transform: scale(1.2);
@@ -827,4 +827,8 @@ body {
     height: 200px;
     object-fit: cover;
     display: block;
+}
+
+.produto-card {
+    position: relative;
 }

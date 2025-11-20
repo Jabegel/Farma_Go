@@ -21,3 +21,55 @@
     height: 180px;
     object-fit: contain;
 }
+
+/* Container do card */
+.card-produto, .produto-card {
+    position: relative; /* Necessário para posicionar o coração dentro do card */
+}
+
+/* Botão do coração */
+.fav-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    color: #ccc;
+    transition: 0.2s;
+}
+
+.fav-btn:hover {
+    transform: scale(1.1);
+    color: red;
+    
+}
+
+.card-produto, .produto-card {
+    position: relative;
+}
+
+/* Permite posicionar o coração dentro do card */
+.produto-card,
+.card-produto {
+    position: relative;
+}
+
+/* Botão do coração */
+.fav-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    color: #ccc;
+    transition: 0.2s ease-in-out;
+}
+
+.fav-btn:hover {
+    transform: scale(1.1);
+    color: red;
+}
