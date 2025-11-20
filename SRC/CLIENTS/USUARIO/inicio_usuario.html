@@ -4,14 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FarmaGo - Início</title>
-  
-  <link rel="stylesheet" href="../style.css"> 
+  <link rel="stylesheet" href="/style.css"> 
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
 
   <header class="main-header">
     <a href="inicio_usuario.html" class="logo">FarmaGo</a>
     <nav>
+      <a href="favoritos.html" class="favorites-link">
+          <span class="material-icons" style="vertical-align: middle;">favorite</span> Meus Favoritos
+      </a>
       <a href="#">Meus Pedidos</a>
       <a href="#">Meu Perfil</a>
       <a href="../login.html">Sair</a>
@@ -24,30 +27,149 @@
       <input type="search" class="search-bar" placeholder="Digite o nome de uma farmácia ou produto...">
     </section>
     
+    <section id="lista-favoritos-home" style="margin-bottom: 30px;">
+        </section>
 
     <h3>Farmácias Parceiras</h3>
     <div class="card-grid">
-      <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
-        <article class="card">
+      
+      <article class="card" 
+               data-farmacia-nome="Farmácia São José" 
+               data-farmacia-img="httpslogo_farmacia.png"
+               data-farmacia-desc="Av. Principal, 123 - 1.5km">
+        <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
           <img src="httpslogo_farmacia.png" alt="Farmácia São José" class="card-image">
           <div class="card-content">
             <h3>Farmácia São José</h3>
             <p>Av. Principal, 123 - 1.5km</p>
           </div>
-        </article>
-      </a>
+        </a>
+        <button class="favorite-btn" 
+                onclick="toggleFavorito('Farmácia São José', 'httpslogo_farmacia.png', 'Av. Principal, 123 - 1.5km')">
+             <span class="material-icons heart-icon">favorite_border</span>
+        </button>
+      </article>
 
-      <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
-        <article class="card">
+      <article class="card" 
+               data-farmacia-nome="Farmácia Popular" 
+               data-farmacia-img="httpslogo_farmacia_2.png"
+               data-farmacia-desc="Rua da Saúde, 45 - 2.1km">
+        <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
           <img src="httpslogo_farmacia_2.png" alt="Farmácia Popular" class="card-image">
           <div class="card-content">
             <h3>Farmácia Popular</h3>
             <p>Rua da Saúde, 45 - 2.1km</p>
           </div>
-        </article>
-      </a>
-    </div>
-  </main>
+        </a>
+        <button class="favorite-btn" 
+                onclick="toggleFavorito('Farmácia Popular', 'httpslogo_farmacia_2.png', 'Rua da Saúde, 45 - 2.1km')">
+            <span class="material-icons heart-icon">favorite_border</span>
+        </button>
+      </article>
 
+      </div>
+  </main>
+  
+  <script>
+    const containerFavoritosHome = document.getElementById('lista-favoritos-home');
+
+    // --- Funções de Gerenciamento do LocalStorage ---
+
+    function getFavoritos() {
+        return JSON.parse(localStorage.getItem('meusFavoritos')) || [];
+    }
+
+    function isFavorito(nome) {
+        return getFavoritos().some(item => item.nome === nome);
+    }
+
+    // --- Função Principal: Adicionar ou Remover ---
+
+    function toggleFavorito(nome, imagem, descricao) {
+        let favoritos = getFavoritos();
+        
+        if (isFavorito(nome)) {
+            // Remover
+            favoritos = favoritos.filter(item => item.nome !== nome);
+            console.log(`Removido: ${nome}`);
+        } else {
+            // Adicionar
+            const novoFavorito = { nome, imagem, descricao };
+            favoritos.push(novoFavorito);
+            console.log(`Adicionado: ${nome}`);
+        }
+        
+        localStorage.setItem('meusFavoritos', JSON.stringify(favoritos));
+        
+        // Atualiza a interface (ícones e lista de favoritos)
+        updateAllUI(); 
+    }
+
+    // --- Funções de Atualização Visual (UI) ---
+
+    // 1. Atualiza os ícones de coração (preenche/esvazia) em todos os cards
+    function updateHeartIcons() {
+        document.querySelectorAll('.card').forEach(card => {
+            const farmaciaNome = card.getAttribute('data-farmacia-nome');
+            const iconSpan = card.querySelector('.heart-icon');
+
+            if (iconSpan) {
+                if (isFavorito(farmaciaNome)) {
+                    iconSpan.textContent = 'favorite'; // Coração preenchido
+                    iconSpan.style.color = '#ff4757'; // Cor vermelha
+                } else {
+                    iconSpan.textContent = 'favorite_border'; // Coração vazio
+                    iconSpan.style.color = 'gray'; // Cor padrão
+                }
+            }
+        });
+    }
+
+    // 2. Cria e exibe a seção de "Farmácias Favoritas" no início
+    function renderFavoritosSection() {
+        const favoritos = getFavoritos();
+        
+        let htmlContent = '';
+        
+        if (favoritos.length > 0) {
+            htmlContent += `
+                <h3>Minhas Favoritas ❤️</h3>
+                <div class="card-grid">
+            `;
+            
+            favoritos.forEach(item => {
+                htmlContent += `
+                    <article class="card favorito-card" data-farmacia-nome="${item.nome}" data-farmacia-img="${item.imagem}" data-farmacia-desc="${item.descricao}">
+                        <a href="farmacia_produtos.html" style="text-decoration: none; color: inherit;">
+                            <img src="${item.imagem}" alt="${item.nome}" class="card-image">
+                            <div class="card-content">
+                                <h3>${item.nome}</h3>
+                                <p>${item.descricao}</p>
+                            </div>
+                        </a>
+                        <button class="favorite-btn" 
+                                onclick="toggleFavorito('${item.nome}', '${item.imagem}', '${item.descricao}')"
+                                style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer;">
+                            <span class="material-icons heart-icon" style="color:#ff4757;">favorite</span>
+                        </button>
+                    </article>
+                `;
+            });
+            
+            htmlContent += `</div>`;
+        }
+        
+        containerFavoritosHome.innerHTML = htmlContent;
+    }
+
+    // Função para rodar todas as atualizações
+    function updateAllUI() {
+        updateHeartIcons();
+        renderFavoritosSection();
+    }
+
+    // Roda a atualização quando a página carrega
+    window.onload = updateAllUI;
+</script>
 </body>
 </html>

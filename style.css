@@ -574,3 +574,32 @@ body {
   border-radius: 5px;
   box-sizing: border-box;
 }
+/* Estilo básico para o botão de favorito */
+.favorite-btn {
+    position: absolute; /* Para que ele fique no canto do card, se o card for position: relative */
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0; /* Remove padding desnecessário */
+    z-index: 10; /* Garante que fique por cima da imagem */
+}
+
+/* O ícone de coração em si */
+.heart-icon {
+    font-size: 28px; /* Tamanho do coração */
+    transition: color 0.2s; /* Animação suave */
+}
+
+/* Garante que o card é o elemento de referência para o position: absolute do botão */
+.card {
+    position: relative; 
+    /* Outros estilos do seu card... */
+}
+
+/* Garante que o link não interfira no botão */
+.card a {
+    display: block;
+    /* Outros estilos do seu link... */
+}
