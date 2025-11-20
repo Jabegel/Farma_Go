@@ -235,10 +235,27 @@ async function removerItem(id_produto) {
 // =============================================
 //  FINALIZAR PEDIDO
 // =============================================
-document.getElementById("btnConfirmarPedido").addEventListener("click", () => {
-    alert("Pedido confirmado!");
+document.getElementById("btnConfirmarPedido").addEventListener("click", async () => {
+
+    const req = await fetch("http://127.0.0.1:3000/api/pedido/finalizar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_usuario: usuario.id })
+    });
+
+    const res = await req.json();
+
+    if (!res.success) {
+        alert("Erro ao finalizar pedido!");
+        return;
+    }
+
+    // Salvar dados para a página de confirmação
+    localStorage.setItem("pedidoFinalizado", JSON.stringify(res));
+
     window.location.href = "pedido_confirmado.html";
 });
+
 
 
 

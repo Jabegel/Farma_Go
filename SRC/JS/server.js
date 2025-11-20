@@ -466,10 +466,64 @@ app.get('/api/endereco/:id_endereco', (req, res) => {
     );
 });
 
+/* ============================================================
+   FINALIZAR PEDIDO — GERA ID ÚNICO E RETORNA FARMÁCIAS
+   ============================================================ */
+app.post("/api/pedido/finalizar", (req, res) => {
+    const { id_usuario } = req.body;
+
+    if (!id_usuario) {
+        return res.json({ success: false, message: "Usuário inválido." });
+    }
+
+    // 1) Buscar carrinho aberto
+    db.query(
+        `SELECT id_carrinho FROM carrinho WHERE id_usuario = ? AND status = 'aberto' LIMIT 1`,
+        [id_usuario],
+        (err, carr) => {
+            if (err) return res.status(500).json({ success: false, message: "Erro no servidor." });
+
+            if (carr.length === 0) {
+                return res.json({ success: false, message: "Carrinho vazio." });
+            }
+
+            const id_carrinho = carr[0].id_carrinho;
+
+            // 2) Listar farmácias dos produtos
+            db.query(
+                `SELECT DISTINCT p.id_farmacia, f.nome
+                 FROM carrinho_itens ci
+                 JOIN produtos p ON ci.id_produto = p.id_produto
+                 JOIN farmacias f ON f.id_farmacia = p.id_farmacia
+                 WHERE ci.id_carrinho = ?`,
+                [id_carrinho],
+                (err2, farmacias) => {
+                    if (err2) return res.json({ success: false, message: "Erro ao buscar farmácias." });
+
+                    // 3) Gerar ID único do pedido
+                    const pedidoId = Date.now(); // único + nunca repete
+
+                    // 4) Finalizar carrinho
+                    db.query(
+                        `UPDATE carrinho SET status = 'finalizado' WHERE id_carrinho = ?`,
+                        [id_carrinho]
+                    );
+
+                    return res.json({
+                        success: true,
+                        pedidoId,
+                        farmacias
+                    });
+                }
+            );
+        }
+    );
+});
+
 
 /* ============================================================
    INICIAR SERVIDOR
    ============================================================ */
 app.listen(3000, () => {
-  console.log('🚀 Servidor rodando em http://127.0.0.1:3000');
+  console.log(' Servidor rodando em http://127.0.0.1:3000');
 });
