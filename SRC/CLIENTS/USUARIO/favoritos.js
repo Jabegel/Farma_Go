@@ -1,10 +1,13 @@
 // ==========================
-//  CARREGAR FAVORITOS
+//  CARREGAR FAVORITOS (por usuário)
 // ==========================
 function carregarFavoritos() {
     const lista = document.getElementById("listaFavoritos");
 
-    const favoritos = JSON.parse(localStorage.getItem("favoritosProdutos")) || [];
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+    // Cada usuário terá sua própria key
+    const favoritos = JSON.parse(localStorage.getItem(`favoritosProdutos_${usuario.id}`)) || [];
 
     if (favoritos.length === 0) {
         lista.innerHTML = `
@@ -36,14 +39,16 @@ function carregarFavoritos() {
 }
 
 // ==========================
-//  REMOVER FAVORITO
+//  REMOVER FAVORITO (por usuário)
 // ==========================
 function removerFavorito(id) {
-    let favoritos = JSON.parse(localStorage.getItem("favoritosProdutos")) || [];
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+    let favoritos = JSON.parse(localStorage.getItem(`favoritosProdutos_${usuario.id}`)) || [];
 
     favoritos = favoritos.filter(p => p.id_produto !== id);
 
-    localStorage.setItem("favoritosProdutos", JSON.stringify(favoritos));
+    localStorage.setItem(`favoritosProdutos_${usuario.id}`, JSON.stringify(favoritos));
 
     carregarFavoritos();
 }

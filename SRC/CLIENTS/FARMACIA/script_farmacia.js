@@ -54,12 +54,16 @@ function carregarNomeFarmacia(idFarmacia) {
 //  FAVORITOS - LOCALSTORAGE
 // =====================================================
 function getFavoritosProdutos() {
-    return JSON.parse(localStorage.getItem("favoritosProdutos")) || [];
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+    return JSON.parse(localStorage.getItem(`favoritosProdutos_${usuario.id}`)) || [];
 }
 
+
 function salvarFavoritosProdutos(lista) {
-    localStorage.setItem("favoritosProdutos", JSON.stringify(lista));
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+    localStorage.setItem(`favoritosProdutos_${usuario.id}`, JSON.stringify(lista));
 }
+
 
 function toggleFavorito(produto) {
 
