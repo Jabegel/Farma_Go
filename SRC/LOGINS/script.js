@@ -4,7 +4,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
   const login = document.getElementById("loginUser").value.trim();
   const senha = document.getElementById("loginSenha").value.trim();
   const tipoRadio = document.querySelector('input[name="tipoUsuario"]:checked');
-  const tipoUsuario = tipoRadio ? tipoRadio.value : null; // pode ser null
+  const tipoUsuario = tipoRadio ? tipoRadio.value : null;
 
   try {
     const resposta = await fetch("http://127.0.0.1:3000/login", {
@@ -20,7 +20,14 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       return;
     }
 
-    // Redirecionamento conforme tipo real do banco
+    // ⭐ SALVAR LOGIN AQUI ⭐
+    localStorage.setItem("usuarioLogado", JSON.stringify({
+      id: data.id,
+      nome: data.nome,
+      tipo: data.tipo
+    }));
+
+    // Redireciona conforme o tipo
     switch (data.tipo) {
       case "cliente":
         window.location.href = "../USUARIO/inicio_usuario.html";
