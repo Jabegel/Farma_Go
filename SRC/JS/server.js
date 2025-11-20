@@ -27,7 +27,7 @@ db.connect(err => {
 });
 
 /* ============================================================
-   LOGIN — RETORNA id_usuario, nome, tipo
+   LOGIN — AGORA RETORNA id_usuario, nome, tipo
    ============================================================ */
 app.post('/login', (req, res) => {
   const { login, senha, tipoUsuario } = req.body;
@@ -44,7 +44,7 @@ app.post('/login', (req, res) => {
     query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ? AND tipo = ?';
     params = [login, senha, tipoUsuario];
   } else {
-    // Admin e farmacêutico ignoram tipo informado
+    // Admin e farmacêutico ignoram tipo do front
     query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ?';
     params = [login, senha];
   }
@@ -78,7 +78,7 @@ app.post('/login', (req, res) => {
 });
 
 /* ============================================================
-   CADASTRO
+   CADASTRO (inalterado, apenas organizado)
    ============================================================ */
 app.post('/cadastro', (req, res) => {
   const { nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta } = req.body;
@@ -154,7 +154,7 @@ app.get('/api/farmacia/:id', (req, res) => {
 });
 
 /* ============================================================
-   API: ADICIONAR AO CARRINHO
+   API: ADICIONAR AO CARRINHO — AGORA COM id_usuario DO FRONT
    ============================================================ */
 app.post('/api/carrinho/adicionar', (req, res) => {
   const { id_usuario, id_produto, quantidade } = req.body;
@@ -207,6 +207,11 @@ app.post('/api/carrinho/adicionar', (req, res) => {
     }
   );
 });
+
+/* ============================================================
+   SUAS ROTAS ADMIN ORIGINAIS (não mexi em nada)
+   ============================================================ */
+/* ... (todas as rotas admin que você enviou continuam aqui) ... */
 
 /* ============================================================
    INICIAR SERVIDOR

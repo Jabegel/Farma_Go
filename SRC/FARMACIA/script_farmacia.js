@@ -80,12 +80,11 @@ function carregarProdutos(farmaciaId) {
 }
 
 // ===============================
-// ADICIONAR AO CARRINHO (CORRIGIDO)
+// ADICIONAR AO CARRINHO
 // ===============================
 function adicionarCarrinho(idProduto) {
 
-    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
-    const idUsuario = usuario?.id;
+    const idUsuario = localStorage.getItem("id_usuario");
 
     if (!idUsuario) {
         alert("Você precisa estar logado!");
@@ -96,7 +95,7 @@ function adicionarCarrinho(idProduto) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            id_usuario: idUsuario,
+            id_usuario: Number(idUsuario),
             id_produto: idProduto,
             quantidade: 1
         })

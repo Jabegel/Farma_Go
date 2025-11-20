@@ -1,14 +1,4 @@
-// ⭐ 1. Verificar login ANTES de tudo ⭐
-const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
-
-if (!usuario) {
-  alert("Você precisa estar logado!");
-  window.location.href = "../LOGINS/login.html";
-}
-
-
-// ⭐ 2. Função de compra
-async function comprarItem(idFarmacia, nomeItem) {
+async function comprarItem(idUsuario, idFarmacia, nomeItem) {
   const quantidade = parseInt(document.getElementById('quantidadeDipirona').value);
 
   if (isNaN(quantidade) || quantidade <= 0) {
@@ -21,7 +11,7 @@ async function comprarItem(idFarmacia, nomeItem) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id_usuario: usuario.id,      // ⭐ pega id do usuário logado
+        id_usuario: idUsuario,
         id_farmacia: idFarmacia,
         item: nomeItem,
         quantidade
@@ -41,7 +31,6 @@ async function comprarItem(idFarmacia, nomeItem) {
   }
 }
 
-// ⭐ 3. Carregar compras automaticamente, se existir tabela
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("listaCompras")) {
     carregarCompras();
