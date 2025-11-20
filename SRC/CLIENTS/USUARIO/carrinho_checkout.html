@@ -1,62 +1,63 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FarmaGo - Checkout</title>
     <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
 
-<header class="main-header">
-    <a href="inicio_usuario.html" class="logo">FarmaGo</a>
-    <nav>
-        <a href="../LOGINS/login.html">Sair</a>
-    </nav>
-</header>
+    <header class="main-header">
+        <a href="inicio_usuario.html" class="logo">FarmaGo</a>
+        <nav>
+            <a href="../LOGINS/login.html">Sair</a>
+        </nav>
+    </header>
 
-<main class="container">
-    <h2>Finalizar Pedido</h2>
+    <main class="container">
+        <h2>Finalizar Pedido</h2>
 
-    <div class="checkout-layout">
+        <div class="checkout-layout">
 
-        <!-- ENDEREÇOS DINÂMICOS -->
-        <section class="checkout-form">
-            <h3>Endereço de Entrega</h3>
+            <!-- ========== ENDEREÇOS DINÂMICOS ========== -->
+            <section class="checkout-form">
+                <h3>Endereço de Entrega</h3>
 
-            <div id="listaEnderecos">
-                Carregando endereços...
-            </div>
+                <div id="listaEnderecos">Carregando endereços...</div>
 
-            <a href="endereco_usuario.html">+ Adicionar novo endereço</a>
+                <a href="/SRC/CLIENTS/USUARIO/endereco_usuario_novo.html">+ Adicionar novo endereço</a>
 
-            <h3 style="margin-top:2rem;">Forma de Pagamento</h3>
+                <h3 style="margin-top:2rem;">Forma de Pagamento</h3>
 
-            <div class="form-group">
-                <input type="radio" name="pagamento" checked>
-                <label>Pix</label>
-            </div>
+                <div class="form-group">
+                    <input type="radio" name="pagamento" checked>
+                    <label>Pix</label>
+                </div>
 
-            <div class="form-group">
-                <input type="radio" name="pagamento">
-                <label>Cartão de Crédito (na entrega)</label>
-            </div>
-        </section>
+                <div class="form-group">
+                    <input type="radio" name="pagamento">
+                    <label>Cartão de Crédito (na entrega)</label>
+                </div>
+            </section>
 
-        <!-- RESUMO DO PEDIDO DINÂMICO -->
-        <aside class="checkout-summary">
-            <h3>Resumo do Pedido</h3>
-            <ul class="checkout-list"></ul>
+            <!-- ========== RESUMO DINÂMICO DO PEDIDO ========== -->
+            <aside class="checkout-summary">
+                <h3>Resumo do Pedido</h3>
+                <ul class="checkout-list"></ul>
 
-            <button id="btnConfirmarPedido" class="btn btn-primary">
-                Confirmar Pedido
-            </button>
-        </aside>
+                <button id="btnConfirmarPedido" class="btn btn-primary">
+                    Confirmar Pedido
+                </button>
+            </aside>
 
-    </div>
-</main>
+        </div>
+    </main>
 
-<script src="script_checkout.js"></script>
+    <script src="script_checkout.js"></script>
 
 </body>
+
 </html>

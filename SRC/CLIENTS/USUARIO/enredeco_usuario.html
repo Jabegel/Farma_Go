@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FarmaGo - Novo Endereço</title>
+    <title>Meus Endereços - FarmaGo</title>
 
     <link rel="stylesheet" href="/style.css">
 
     <style>
         body {
-            background: #f8f9fa;
+            background: #f7f7f7;
         }
 
-        .endereco-container {
-            max-width: 480px;
-            background: #fff;
-            margin: 40px auto;
+        .endereco-page {
+            max-width: 700px;
+            margin: 30px auto;
+            background: white;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 14px rgba(0,0,0,0.08);
         }
 
         h2 {
@@ -26,186 +26,202 @@
             margin-bottom: 20px;
         }
 
-        .form-group {
-            margin-bottom: 15px;
+        .endereco-item {
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            background: #fafafa;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
+        .endereco-info {
             font-size: 15px;
+            max-width: 80%;
         }
 
-        .btn-primary {
+        .btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-info, .btn-remove {
+            padding: 7px 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-info {
+            background: #0d6efd;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #084dbf;
+        }
+
+        .btn-remove {
+            background: #ff3b3b;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background: #bb1515;
+        }
+
+        .btn-add {
             width: 100%;
+            margin-top: 18px;
             padding: 12px;
-            background: #007bff;
-            color: #fff;
             border-radius: 10px;
             border: none;
-            font-size: 17px;
+            background: #0d6efd;
+            color: white;
+            font-size: 16px;
             cursor: pointer;
         }
 
-        .btn-primary:hover {
-            background: #005ce6;
-        }
-
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #007bff;
+        .btn-add:hover {
+            background: #084dbf;
         }
     </style>
-
 </head>
+
 <body>
 
 <header class="main-header">
     <a href="inicio_usuario.html" class="logo">FarmaGo</a>
     <nav>
-        <a href="carrinho_checkout.html">Meus Pedidos</a>
-        <a href="/SRC/LOGINS/login.html">Sair</a>
+        <a href="carrinho_checkout.html">Carrinho</a>
+        <a href="../LOGINS/login.html">Sair</a>
     </nav>
 </header>
 
 <main>
-    <div class="endereco-container">
+    <div class="endereco-page">
 
-        <h2>Cadastrar Novo Endereço</h2>
+        <h2>Meus Endereços</h2>
 
-        <form id="formEndereco">
+        <div id="listaEnderecos">
+            Carregando...
+        </div>
 
-            <div class="form-group">
-                <label>CEP</label>
-                <input type="text" id="cep" placeholder="00000-000" maxlength="9" required>
-            </div>
+        <button class="btn-add" onclick="window.location.href='endereco_usuario_novo.html'">
+            + Adicionar Novo Endereço
+        </button>
 
-            <div class="form-group">
-                <label>Rua</label>
-                <input type="text" id="rua" required>
-            </div>
-
-            <div class="form-group">
-                <label>Número</label>
-                <input type="text" id="numero" required>
-            </div>
-
-            <div class="form-group">
-                <label>Bairro</label>
-                <input type="text" id="bairro" required>
-            </div>
-
-            <div class="form-group">
-                <label>Cidade</label>
-                <input type="text" id="cidade" required>
-            </div>
-
-            <div class="form-group">
-                <label>Estado</label>
-                <select id="estado" required>
-                    <option value="">Selecione...</option>
-                    <option>SP</option>
-                    <option>DF</option>
-                    <option>RJ</option>
-                    <option>MG</option>
-                    <option>ES</option>
-                    <option>PR</option>
-                    <option>SC</option>
-                    <option>RS</option>
-                    <option>BA</option>
-                    <option>PE</option>
-                    <option>CE</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Complemento (opcional)</label>
-                <input type="text" id="complemento">
-            </div>
-
-            <button class="btn-primary" type="submit">Salvar Endereço</button>
-
-        </form>
-
-        <a href="carrinho_checkout.html" class="back-link">⟵ Voltar ao Checkout</a>
     </div>
 </main>
+
 
 <script>
     const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
 
-    if (!usuario) {
+    if (!usuario || !usuario.id) {
         alert("Você precisa estar logado!");
         window.location.href = "/SRC/LOGINS/login.html";
     }
 
-    // ========= AUTO-PREENCHER POR CEP (ViaCEP) =========
-    document.getElementById("cep").addEventListener("blur", async () => {
-        const cep = document.getElementById("cep").value.replace("-", "");
-
-        if (cep.length !== 8) return;
-
-        try {
-            const req = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-
-            const data = await req.json();
-
-            if (!data.erro) {
-                rua.value = data.logradouro;
-                bairro.value = data.bairro;
-                cidade.value = data.localidade;
-                estado.value = data.uf;
-            }
-
-        } catch (e) {
-            console.log("Erro ao buscar CEP:", e);
-        }
-    });
-
-
-    // ========= SALVAR ENDEREÇO NO BANCO =========
-    document.getElementById("formEndereco").addEventListener("submit", async e => {
-        e.preventDefault();
-
-        const dados = {
-            id_usuario: usuario.id,
-            cep: cep.value,
-            rua: rua.value,
-            numero: numero.value,
-            bairro: bairro.value,
-            cidade: cidade.value,
-            estado: estado.value,
-            complemento: complemento.value
-        };
+    // ============================
+    // Carregar todos os endereços
+    // ============================
+    async function carregarEnderecos() {
+        const box = document.getElementById("listaEnderecos");
 
         try {
-            const req = await fetch("http://127.0.0.1:3000/api/enderecos/adicionar", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dados)
-            });
+            const req = await fetch(`http://127.0.0.1:3000/api/enderecos/${usuario.id}`);
+            const enderecos = await req.json();
 
-            const res = await req.json();
-
-            if (!res.success) {
-                alert("❌ Erro: " + res.message);
+            if (!enderecos.length) {
+                box.innerHTML = `
+                    <p>Você ainda não possui endereços cadastrados.</p>
+                `;
                 return;
             }
 
-            alert("✅ Endereço cadastrado!");
+            box.innerHTML = "";
 
-            window.location.href = "carrinho_checkout.html";
+            enderecos.forEach(end => {
+                box.innerHTML += `
+                    <div class="endereco-item">
+                        <div class="endereco-info">
+                            <b>${end.rua}, ${end.numero}</b><br>
+                            ${end.bairro} — ${end.cidade}/${end.estado}
+                        </div>
+
+                        <div class="btns">
+                            <button class="btn-info" onclick="mostrarDetalhes(${end.id_endereco})">!</button>
+                            <button class="btn-remove" onclick="removerEndereco(${end.id_endereco})">🗑</button>
+                        </div>
+                    </div>
+                `;
+            });
 
         } catch (err) {
-            console.error(err);
-            alert("Erro ao conectar com o servidor.");
+            console.log(err);
+            box.innerHTML = "<p>Erro ao carregar endereços.</p>";
         }
-    });
+    }
+
+    // ============================
+    // Ver detalhes (!)
+    // ============================
+    async function mostrarDetalhes(id) {
+        try {
+            const req = await fetch(`http://127.0.0.1:3000/api/endereco/${id}`);
+            const e = await req.json();
+
+            alert(`
+📍 Endereço Completo:
+
+Rua: ${e.rua}, Nº ${e.numero}
+Bairro: ${e.bairro}
+Cidade: ${e.cidade} - ${e.estado}
+CEP: ${e.cep}
+Complemento: ${e.complemento || "(nenhum)"}
+            `);
+
+        } catch (err) {
+            alert("Erro ao buscar detalhes.");
+        }
+    }
+
+    // ============================
+    // Remover endereço
+    // ============================
+    async function removerEndereco(id_endereco) {
+        if (!confirm("Deseja realmente remover este endereço?")) return;
+
+        try {
+            const req = await fetch("http://127.0.0.1:3000/api/enderecos/remover", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id_endereco,
+                    id_usuario: usuario.id
+                })
+            });
+
+            const result = await req.json();
+
+            if (result.success) {
+                carregarEnderecos();
+            } else {
+                alert("Não foi possível remover.");
+            }
+
+        } catch (err) {
+            console.log(err);
+            alert("Erro ao remover.");
+        }
+    }
+
+    // Iniciar tela
+    document.addEventListener("DOMContentLoaded", carregarEnderecos);
 </script>
 
 </body>
