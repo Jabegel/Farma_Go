@@ -11,7 +11,7 @@
 <header class="main-header">
   <a href="inicio_usuario.html" class="logo">FarmaGo</a>
   <nav>
-    <a href="carrinho_checkout.html">Meus Pedidos</a>
+    <a href="pedidos_historico.html">Meus Pedidos</a>
     <a href="/SRC/LOGINS/login.html">Sair</a>
   </nav>
 </header>
@@ -21,7 +21,11 @@
 
     <h2>Oba! Pedido a caminho!</h2>
 
-    <p id="pedidoInfo">Carregando pedido...</p>
+    <!-- Aqui vai aparecer o ID -->
+    <div id="infoPedido" style="margin-top: 15px; font-size: 18px;"></div>
+
+    <!-- Aqui vai aparecer a lista de farmácias -->
+    <div id="farmaciasPedido" style="margin-top: 20px;"></div>
 
     <br>
     <a href="inicio_usuario.html" class="btn btn-primary" style="width: auto;">Voltar ao Início</a>
@@ -29,19 +33,35 @@
 </main>
 
 <script>
-  const dados = JSON.parse(localStorage.getItem("pedidoFinalizado"));
+document.addEventListener("DOMContentLoaded", () => {
+    const pedido = JSON.parse(localStorage.getItem("pedidoFinalizado"));
 
-  if (!dados) {
-    document.getElementById("pedidoInfo").innerHTML = "Erro ao carregar pedido.";
-  } else {
-    const nomesFarmacias = dados.farmacias.map(f => f.nome).join(", ");
+    if (!pedido || !pedido.success) {
+        document.getElementById("infoPedido").innerHTML =
+            "<p>Erro ao carregar pedido.</p>";
+        return;
+    }
 
-    document.getElementById("pedidoInfo").innerHTML = `
-      Seu pedido <strong>#${dados.pedidoId}</strong> foi confirmado.<br>
-      Farmácias envolvidas: <strong>${nomesFarmacias}</strong><br><br>
-      O entregador já está a caminho!
+    // Mostrar ID do pedido
+    document.getElementById("infoPedido").innerHTML = `
+        <p><strong>ID do Pedido:</strong> ${pedido.pedidoId}</p>
     `;
-  }
+
+    // Mostrar lista de farmácias atendendo
+    const boxFarm = document.getElementById("farmaciasPedido");
+
+    if (pedido.farmacias && pedido.farmacias.length > 0) {
+        boxFarm.innerHTML = "<h3>Farmácias enviando o pedido:</h3>";
+
+        pedido.farmacias.forEach(f => {
+            boxFarm.innerHTML += `
+                <p>🏥 <strong>${f.nome}</strong> (ID: ${f.id_farmacia})</p>
+            `;
+        });
+    } else {
+        boxFarm.innerHTML = "<p>Nenhuma farmácia encontrada.</p>";
+    }
+});
 </script>
 
 </body>

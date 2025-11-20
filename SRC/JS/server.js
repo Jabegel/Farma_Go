@@ -465,70 +465,99 @@ app.delete("/api/cartoes/remover", (req, res) => {
   res.json({ success: true });
 });
 
+
 /* ============================================================
-   FINALIZAR PEDIDO — SALVA NO BANCO
+   FINALIZAR PEDIDO COMPLETO — COM FARMÁCIAS E SALVANDO NO BD
    ============================================================ */
 app.post("/api/pedido/finalizar", (req, res) => {
-  const { id_usuario, pagamento, id_cartao } = req.body;
+    const { id_usuario, pagamento, id_cartao } = req.body;
 
-  if (!id_usuario) return res.json({ success: false });
-
-  db.query(
-    `SELECT * FROM carrinho WHERE id_usuario = ? AND status = 'aberto' LIMIT 1`,
-    [id_usuario],
-    (err, carr) => {
-      if (carr.length === 0) return res.json({ success: false });
-
-      const id_carrinho = carr[0].id_carrinho;
-
-      db.query(
-        `SELECT ci.*, p.nome, p.id_farmacia 
-         FROM carrinho_itens ci
-         JOIN produtos p ON p.id_produto = ci.id_produto
-         WHERE id_carrinho = ?`,
-        [id_carrinho],
-        (err2, itens) => {
-          if (itens.length === 0) return res.json({ success: false });
-
-          const pedidoId = Date.now();
-          const total = itens.reduce(
-            (sum, i) => sum + i.preco_unitario * i.quantidade,
-            0
-          ) + 10;
-
-          db.query(
-            `
-            INSERT INTO pedidos (id_pedido, id_usuario, pagamento, id_cartao, total)
-            VALUES (?, ?, ?, ?, ?)
-            `,
-            [pedidoId, id_usuario, pagamento, id_cartao || null, total],
-            err3 => {
-              const values = itens.map(i => [
-                pedidoId,
-                i.id_produto,
-                i.quantidade,
-                i.preco_unitario,
-              ]);
-
-              db.query(
-                `INSERT INTO pedidos_itens (id_pedido, id_produto, quantidade, preco_unitario)
-                 VALUES ?`,
-                [values]
-              );
-
-              db.query(
-                `UPDATE carrinho SET status = 'finalizado' WHERE id_carrinho = ?`,
-                [id_carrinho]
-              );
-
-              return res.json({ success: true, pedidoId, total });
-            }
-          );
-        }
-      );
+    if (!id_usuario) {
+        return res.json({ success: false, message: "Usuário inválido." });
     }
-  );
+
+    // Buscar carrinho aberto
+    db.query(
+        `SELECT * FROM carrinho WHERE id_usuario = ? AND status = 'aberto' LIMIT 1`,
+        [id_usuario],
+        (err, carr) => {
+            if (err || carr.length === 0)
+                return res.json({ success: false, message: "Carrinho vazio." });
+
+            const id_carrinho = carr[0].id_carrinho;
+
+            // Pegar itens do carrinho
+            db.query(
+                `SELECT ci.*, p.nome, p.id_farmacia, p.preco 
+                 FROM carrinho_itens ci
+                 JOIN produtos p ON p.id_produto = ci.id_produto
+                 WHERE id_carrinho = ?`,
+                [id_carrinho],
+                (err2, itens) => {
+                    if (err2 || itens.length === 0)
+                        return res.json({ success: false, message: "Carrinho vazio." });
+
+                    // Farmácias distintas
+                    const farmacias = [...new Set(itens.map(i => i.id_farmacia))];
+
+                    const valuesFarmacias = farmacias.map(id => ({ id_farmacia: id }));
+
+                    // Buscar nomes
+                    db.query(
+                        `SELECT id_farmacia, nome FROM farmacias WHERE id_farmacia IN (?)`,
+                        [farmacias],
+                        (err3, listaFarmacias) => {
+
+                            const pedidoId = Date.now(); // único
+
+                            const total = itens.reduce(
+                                (sum, i) => sum + i.preco * i.quantidade,
+                                0
+                            ) + 10;
+
+                            // Inserir pedido
+                            db.query(
+                                `INSERT INTO pedidos (id_pedido, id_usuario, pagamento, id_cartao, total)
+                                 VALUES (?, ?, ?, ?, ?)`,
+                                [pedidoId, id_usuario, pagamento, id_cartao || null, total],
+                                (err4) => {
+                                    if (err4)
+                                        return res.json({ success: false, message: "Erro ao salvar pedido." });
+
+                                    const values = itens.map(i => [
+                                        pedidoId,
+                                        i.id_produto,
+                                        i.quantidade,
+                                        i.preco
+                                    ]);
+
+                                    db.query(
+                                        `INSERT INTO pedidos_itens (id_pedido, id_produto, quantidade, preco_unitario)
+                                         VALUES ?`,
+                                        [values]
+                                    );
+
+                                    db.query(
+                                        `UPDATE carrinho SET status = 'finalizado' WHERE id_carrinho = ?`,
+                                        [id_carrinho]
+                                    );
+
+                                    return res.json({
+                                        success: true,
+                                        pedidoId,
+                                        farmacias: listaFarmacias,
+                                        total
+                                    });
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+        }
+    );
 });
+
 
 /* ============================================================
    HISTÓRICO DE PEDIDOS
