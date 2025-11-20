@@ -12,6 +12,7 @@ if (!usuarioFarm || !usuarioFarm.id) {
 //  QUANDO A PÁGINA CARREGAR
 // =====================================================
 document.addEventListener("DOMContentLoaded", () => {
+
     const params = new URLSearchParams(window.location.search);
     const farmaciaId = params.get("id");
 
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarProdutos(farmaciaId);
 });
 
+
 // =====================================================
 //  CARREGAR NOME DA FARMÁCIA
 // =====================================================
@@ -33,6 +35,7 @@ function carregarNomeFarmacia(idFarmacia) {
         .then(r => r.json())
         .then(dados => {
             const titulo = document.getElementById("nomeFarmacia");
+
             if (!dados || !dados.nome) {
                 titulo.textContent = "Farmácia não encontrada";
             } else {
@@ -46,8 +49,9 @@ function carregarNomeFarmacia(idFarmacia) {
         });
 }
 
+
 // =====================================================
-//  FAVORITOS (LOCALSTORAGE) - PRODUTOS
+//  FAVORITOS - LOCALSTORAGE
 // =====================================================
 function getFavoritosProdutos() {
     return JSON.parse(localStorage.getItem("favoritosProdutos")) || [];
@@ -57,15 +61,16 @@ function salvarFavoritosProdutos(lista) {
     localStorage.setItem("favoritosProdutos", JSON.stringify(lista));
 }
 
-function toggleFavorito(id_produto) {
+function toggleFavorito(produto) {
+
     let favoritos = getFavoritosProdutos();
 
-    if (favoritos.includes(id_produto)) {
-        // remover
-        favoritos = favoritos.filter(id => id !== id_produto);
+    const existe = favoritos.find(f => f.id_produto === produto.id_produto);
+
+    if (existe) {
+        favoritos = favoritos.filter(f => f.id_produto !== produto.id_produto);
     } else {
-        // adicionar
-        favoritos.push(id_produto);
+        favoritos.push(produto);
     }
 
     salvarFavoritosProdutos(favoritos);
@@ -75,14 +80,12 @@ function toggleFavorito(id_produto) {
 function pintarFavoritos() {
     const favoritos = getFavoritosProdutos();
 
-    // todos os botões de coração
     document.querySelectorAll(".fav-btn").forEach(btn => {
-        const match = btn.dataset.idProduto;
-        if (!match) return;
 
-        const id = Number(match);
+        const id = Number(btn.dataset.idProduto);
+        const estaNosFavoritos = favoritos.some(f => f.id_produto === id);
 
-        if (favoritos.includes(id)) {
+        if (estaNosFavoritos) {
             btn.textContent = "❤️";
             btn.style.color = "red";
         } else {
@@ -92,17 +95,21 @@ function pintarFavoritos() {
     });
 }
 
+
 // =====================================================
 //  CARREGAR PRODUTOS DA FARMÁCIA
 // =====================================================
 async function carregarProdutos(idFarmacia) {
+
     const lista = document.getElementById("listaProdutos");
     lista.innerHTML = "<p>Carregando produtos...</p>";
 
     try {
+
         const resp = await fetch(
             `http://127.0.0.1:3000/api/produtos?farmacia=${idFarmacia}`
         );
+
         const produtos = await resp.json();
 
         if (!produtos || produtos.length === 0) {
@@ -113,33 +120,34 @@ async function carregarProdutos(idFarmacia) {
         lista.innerHTML = "";
 
         produtos.forEach(prod => {
-            // monta o card do produto
+
             lista.innerHTML += `
-    <div class="produto-card">
+                <div class="produto-card">
 
-        <img src="/${prod.imagem}" class="produto-img">
+                    <img src="/${prod.imagem}" class="produto-img">
 
-        <div class="produto-info-top">
-            <h3>${prod.nome}</h3>
+                    <div class="produto-info-top">
+                        <h3>${prod.nome}</h3>
 
-            <button class="fav-btn" onclick='toggleFavorito(${JSON.stringify(prod)})'>
-                🤍
-            </button>
-        </div>
+                        <button class="fav-btn"
+                                data-id-produto="${prod.id_produto}"
+                                onclick='toggleFavorito(${JSON.stringify(prod)})'>
+                            🤍
+                        </button>
+                    </div>
 
-        <p>${prod.descricao || ""}</p>
+                    <p>${prod.descricao || ""}</p>
 
-        <strong>R$ ${prod.preco.toFixed(2)}</strong>
+                    <strong>R$ ${Number(prod.preco).toFixed(2)}</strong>
 
-        <button class="btn" onclick="adicionarCarrinho(${prod.id_produto})">
-            Adicionar ao Carrinho
-        </button>
-    </div>
-`;
+                    <button class="btn" onclick="adicionarCarrinho(${prod.id_produto})">
+                        Adicionar ao Carrinho
+                    </button>
 
+                </div>
+            `;
         });
 
-        // depois de desenhar todos, pinta os corações corretos
         pintarFavoritos();
 
     } catch (err) {
@@ -148,10 +156,12 @@ async function carregarProdutos(idFarmacia) {
     }
 }
 
+
 // =====================================================
 //  ADICIONAR AO CARRINHO
 // =====================================================
 function adicionarCarrinho(id_produto) {
+
     fetch("http://127.0.0.1:3000/api/carrinho/adicionar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

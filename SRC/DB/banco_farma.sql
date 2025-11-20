@@ -146,7 +146,10 @@ INSERT INTO produtos (id_farmacia, nome, descricao, preco, imagem, estoque, cate
 (1, 'Dipirona 500mg', 'Analgésico e antitérmico', 9.90, 'imagens/dipirona.png', 100, 'Medicamentos'),
 (2, 'Vitamina C 1g', 'Suplemento vitamínico', 12.50, 'imagens/vitaminaC.png', 80, 'Vitaminas'),
 (2, 'Paracetamol 750mg', 'Analgésico e antitérmico', 8.50, 'imagens/paracetamol.png', 120, 'Medicamentos'),
-(3, 'Álcool em Gel 70%', 'Antisséptico para mãos', 6.90, 'imagens/alcoolgel.png', 50, 'Higiene');
+(3, 'Álcool em Gel 70%', 'Antisséptico para mãos', 6.90, 'imagens/alcoolgel.png', 50, 'Higiene'),
+(1, 'Shampoo Anticaspa', 'Shampoo para controle de caspa', 15.00, 'imagens/shampoo.png', 60, 'Higiene'),
+(3, 'Máscara Facial Descartável', 'Máscara de proteção facial', 2.50, 'imagens/mascara.png', 200, 'Higiene');
+
 
 -- ========================================
 -- TABELAS DO CARRINHO
