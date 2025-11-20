@@ -32,7 +32,8 @@ async function carregarCarrinho() {
         let total = 0;
 
         itens.forEach(item => {
-            total += item.subtotal;
+            const subtotal = Number(item.subtotal) || 0;
+            total += subtotal;
 
             lista.innerHTML += `
                 <li data-produto="${item.id_produto}">
@@ -44,7 +45,7 @@ async function carregarCarrinho() {
                         <button class="btn-mais" onclick="aumentarQtd(${item.id_produto})">+</button>
                     </div>
 
-                    <strong>R$ ${item.subtotal.toFixed(2)}</strong>
+                    <strong>R$ ${subtotal.toFixed(2)}</strong>
                 </li>
             `;
         });
@@ -59,7 +60,7 @@ async function carregarCarrinho() {
 
             <li class="total">
                 <span>Total</span>
-                <strong id="totalFinal">R$ ${(total + taxaEntrega).toFixed(2)}</strong>
+                <strong>R$ ${(total + taxaEntrega).toFixed(2)}</strong>
             </li>
         `;
 
