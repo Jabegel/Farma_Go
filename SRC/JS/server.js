@@ -236,6 +236,27 @@ app.get('/api/carrinho/:id_usuario', (req, res) => {
 });
 
 
+app.delete('/api/carrinho/remover', (req, res) => {
+    const { id_usuario, id_produto } = req.body;
+
+    if (!id_usuario || !id_produto) {
+        return res.json({ success: false, message: "Dados insuficientes." });
+    }
+
+    db.query(`
+        DELETE i FROM carrinho_itens i
+        JOIN carrinho c ON c.id_carrinho = i.id_carrinho
+        WHERE c.id_usuario = ? AND i.id_produto = ? AND c.status = 'aberto'
+    `, [id_usuario, id_produto],
+        (err, result) => {
+            if (err) return res.json({ success: false, message: "Erro no servidor." });
+
+            return res.json({ success: true, message: "Item removido!" });
+        }
+    );
+});
+
+
 /* ============================================================
    INICIAR SERVIDOR
    ============================================================ */

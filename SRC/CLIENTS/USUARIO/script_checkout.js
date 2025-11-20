@@ -16,7 +16,6 @@ if (!usuario || !usuario.id) {
 async function carregarCarrinho() {
 
     const lista = document.querySelector(".checkout-summary ul");
-    const totalFinal = document.querySelector("#totalFinal");
 
     lista.innerHTML = "<li>Carregando...</li>";
 
@@ -26,7 +25,6 @@ async function carregarCarrinho() {
 
         if (!itens.length) {
             lista.innerHTML = "<li>Seu carrinho está vazio.</li>";
-            totalFinal.textContent = "R$ 0,00";
             return;
         }
 
@@ -34,17 +32,26 @@ async function carregarCarrinho() {
         let total = 0;
 
         itens.forEach(item => {
-            total += item.subtotal;
+
+            // Garantir que subtotal seja número
+            const subtotalNum = Number(item.subtotal);
+
+            total += subtotalNum;
 
             lista.innerHTML += `
                 <li>
                     <span>${item.nome} (${item.quantidade}x)</span>
-                    <strong>R$ ${item.subtotal.toFixed(2)}</strong>
+                    <strong>R$ ${subtotalNum.toFixed(2)}</strong>
+
+                    <!-- Botão remover -->
+                    <button class="btn-remove"
+                        onclick="removerItem(${item.id_produto})">
+                        Remover
+                    </button>
                 </li>
             `;
         });
 
-        // Taxa fixa de entrega
         const taxaEntrega = 5;
 
         lista.innerHTML += `
@@ -52,6 +59,7 @@ async function carregarCarrinho() {
                 <span>Taxa de Entrega</span>
                 <strong>R$ ${taxaEntrega.toFixed(2)}</strong>
             </li>
+
             <li class="total">
                 <span>Total</span>
                 <strong id="totalFinal">R$ ${(total + taxaEntrega).toFixed(2)}</strong>
@@ -67,13 +75,44 @@ async function carregarCarrinho() {
 
 
 // =============================================
+//  REMOVER ITEM DO CARRINHO
+// =============================================
+async function removerItem(id_produto) {
+
+    if (!confirm("Remover este item?")) return;
+
+    try {
+        const req = await fetch("http://127.0.0.1:3000/api/carrinho/remover", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id_usuario: usuario.id,
+                id_produto
+            })
+        });
+
+        const res = await req.json();
+
+        if (res.success) {
+            alert("Item removido!");
+            carregarCarrinho(); // recarrega
+        } else {
+            alert(res.message || "Erro ao remover item.");
+        }
+
+    } catch (err) {
+        console.error("Erro:", err);
+        alert("Falha ao remover item.");
+    }
+}
+
+
+
+// =============================================
 //  FINALIZAR PEDIDO
 // =============================================
 async function finalizarPedido() {
-    alert("Pedido confirmado! (a rota de confirmar será adicionada depois)");
-
-    // opcional: limpar carrinho no backend futuramente
-
+    alert("Pedido confirmado! (a rota será criada depois)");
     window.location.href = "pedido_confirmado.html";
 }
 
@@ -86,7 +125,5 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarCarrinho();
 
     const botao = document.querySelector("#btnConfirmarPedido");
-    if (botao) {
-        botao.addEventListener("click", finalizarPedido);
-    }
+    if (botao) botao.addEventListener("click", finalizarPedido);
 });
