@@ -1,68 +1,72 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FarmaGo - Pedido Confirmado</title>
   <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
 
-<header class="main-header">
-  <a href="inicio_usuario.html" class="logo">FarmaGo</a>
-  <nav>
-    <a href="pedidos_historico.html">Meus Pedidos</a>
-    <a href="/SRC/LOGINS/login.html">Sair</a>
-  </nav>
-</header>
+  <header class="main-header">
+    <a href="inicio_usuario.html" class="logo">FarmaGo</a>
+    <nav>
+      <a href="pedidos_historico.html">Meus Pedidos</a>
+      <a href="favoritos.html">Favoritos</a>
+      <a href="/SRC/LOGINS/login.html">Sair</a>
+    </nav>
+  </header>
 
-<main class="container">
-  <div class="confirmation-page">
+  <main class="container">
+    <div class="confirmation-page">
 
-    <h2>Oba! Pedido a caminho!</h2>
+      <h2>Oba! Pedido a caminho!</h2>
 
-    <!-- Aqui vai aparecer o ID -->
-    <div id="infoPedido" style="margin-top: 15px; font-size: 18px;"></div>
+      <!-- Aqui vai aparecer o ID -->
+      <div id="infoPedido" style="margin-top: 15px; font-size: 18px;"></div>
 
-    <!-- Aqui vai aparecer a lista de farmácias -->
-    <div id="farmaciasPedido" style="margin-top: 20px;"></div>
+      <!-- Aqui vai aparecer a lista de farmácias -->
+      <div id="farmaciasPedido" style="margin-top: 20px;"></div>
 
-    <br>
-    <a href="inicio_usuario.html" class="btn btn-primary" style="width: auto;">Voltar ao Início</a>
-  </div>
-</main>
+      <br>
+      <a href="inicio_usuario.html" class="btn btn-primary" style="width: auto;">Voltar ao Início</a>
+    </div>
+  </main>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const pedido = JSON.parse(localStorage.getItem("pedidoFinalizado"));
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const pedido = JSON.parse(localStorage.getItem("pedidoFinalizado"));
 
-    if (!pedido || !pedido.success) {
+      if (!pedido || !pedido.success) {
         document.getElementById("infoPedido").innerHTML =
-            "<p>Erro ao carregar pedido.</p>";
+          "<p>Erro ao carregar pedido.</p>";
         return;
-    }
+      }
 
-    // Mostrar ID do pedido
-    document.getElementById("infoPedido").innerHTML = `
+      // Mostrar ID do pedido
+      document.getElementById("infoPedido").innerHTML = `
         <p><strong>ID do Pedido:</strong> ${pedido.pedidoId}</p>
     `;
 
-    // Mostrar lista de farmácias atendendo
-    const boxFarm = document.getElementById("farmaciasPedido");
+      // Mostrar lista de farmácias atendendo
+      const boxFarm = document.getElementById("farmaciasPedido");
 
-    if (pedido.farmacias && pedido.farmacias.length > 0) {
+      if (pedido.farmacias && pedido.farmacias.length > 0) {
         boxFarm.innerHTML = "<h3>Farmácias enviando o pedido:</h3>";
 
         pedido.farmacias.forEach(f => {
-            boxFarm.innerHTML += `
+          boxFarm.innerHTML += `
                 <p> <strong>${f.nome}</strong> </p>
             `;
         });
-    } else {
+      } else {
         boxFarm.innerHTML = "<p>Nenhuma farmácia encontrada.</p>";
-    }
-});
-</script>
+      }
+    });
+  </script>
 
 </body>
+
 </html>

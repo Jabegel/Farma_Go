@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +18,7 @@
             background: #fff;
             padding: 1.5rem;
             border-radius: 15px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
             margin-bottom: 1.5rem;
         }
 
@@ -45,7 +46,7 @@
         }
 
         .form-group label {
-            display:block;
+            display: block;
             margin-bottom: 0.25rem;
             font-weight: 500;
         }
@@ -106,133 +107,138 @@
         }
     </style>
 </head>
+
 <body>
 
-<header class="main-header">
-    <a href="inicio_usuario.html" class="logo">FarmaGo</a>
-    <nav>
-        <a href="carrinho_checkout.html">Meu Carrinho</a>
-        <a href="../LOGINS/login.html">Sair</a>
-    </nav>
-</header>
+    <header class="main-header">
+        <a href="inicio_usuario.html" class="logo">FarmaGo</a>
+        <nav>
+            <a href="carrinho_checkout.html">Meu Carrinho</a>
+            <a href="favoritos.html">Favoritos</a>
+            <a href="../LOGINS/login.html">Sair</a>
+        </nav>
+    </header>
 
-<main class="container">
-    <h2>Meu Perfil</h2>
+    <main class="container">
+        <h2>Meu Perfil</h2>
 
-    <div class="perfil-layout">
-        <!-- Coluna esquerda: dados básicos e médicos -->
-        <section>
-            <div class="card-perfil">
-                <div class="perfil-header">
-                    <img id="fotoPerfil" class="perfil-foto" src="/IMG/default_user.png" alt="Foto de perfil">
-                    <div>
-                        <h3 id="tituloNome">Usuário</h3>
-                        <span class="badge-mini" id="badgeTipo">Cliente</span>
-                        <div class="perfil-upload">
-                            <label style="margin-top:0.4rem; font-size:0.85rem;">
-                                Foto de perfil:
-                                <input type="file" id="uploadFoto" accept="image/*">
-                            </label>
+        <div class="perfil-layout">
+            <!-- Coluna esquerda: dados básicos e médicos -->
+            <section>
+                <div class="card-perfil">
+                    <div class="perfil-header">
+                        <img id="fotoPerfil" class="perfil-foto" src="/IMG/default_user.png" alt="Foto de perfil">
+                        <div>
+                            <h3 id="tituloNome">Usuário</h3>
+                            <span class="badge-mini" id="badgeTipo">Cliente</span>
+                            <div class="perfil-upload">
+                                <label style="margin-top:0.4rem; font-size:0.85rem;">
+                                    Foto de perfil:
+                                    <input type="file" id="uploadFoto" accept="image/*">
+                                </label>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="nome">Nome completo</label>
-                    <input type="text" id="nome">
-                </div>
-
-                <div class="form-group">
-                    <label for="apelido">Apelido</label>
-                    <input type="text" id="apelido" placeholder="Como você prefere ser chamado?">
-                </div>
-
-                <div class="form-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" disabled>
-                </div>
-
-                <div class="form-group">
-                    <label for="dataNascimento">Data de nascimento</label>
-                    <input type="date" id="dataNascimento">
-                </div>
-
-                <div class="btn-row">
-                    <button class="btn btn-primary" id="btnSalvarPerfil">Salvar dados</button>
-                </div>
-            </div>
-
-            <div class="card-perfil">
-                <h3>Informações Médicas</h3>
-
-                <div class="form-group">
-                    <label for="alergias">Alergias</label>
-                    <textarea id="alergias" placeholder="Ex: Dipirona, Ibuprofeno..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="obsMedicas">Observações médicas</label>
-                    <textarea id="obsMedicas" placeholder="Doenças crônicas, uso contínuo de medicamentos, etc."></textarea>
-                </div>
-
-                <div class="btn-row">
-                    <button class="btn btn-primary" id="btnSalvarMedico">Salvar informações médicas</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Coluna direita: endereços e cartões -->
-        <section>
-            <div class="card-perfil">
-                <h3>Meus Endereços</h3>
-
-                <div id="listaEnderecos"></div>
-
-                <a href="endereco_usuario_novo.html" class="btn btn-primary" style="margin-top:0.7rem; display:inline-block;">
-                    + Adicionar novo endereço
-                </a>
-            </div>
-
-            <div class="card-perfil">
-                <h3>Cartões salvos</h3>
-
-                <div id="listaCartoes" style="margin-bottom:0.8rem;"></div>
-
-                <h4 style="font-size:1rem; margin-top:0.8rem;">Adicionar cartão</h4>
-                <div class="form-group">
-                    <label for="nomeCartao">Nome impresso</label>
-                    <input type="text" id="nomeCartao">
-                </div>
-
-                <div class="form-group">
-                    <label for="numeroCartao">Número (apenas para mascarar)</label>
-                    <input type="text" id="numeroCartao" placeholder="Digite o número completo">
-                </div>
-
-                <div class="form-group">
-                    <label for="bandeiraCartao">Bandeira</label>
-                    <input type="text" id="bandeiraCartao" placeholder="Visa, MasterCard...">
-                </div>
-
-                <div class="form-group" style="display:flex; gap:0.6rem;">
-                    <div style="flex:1;">
-                        <label for="mesValidade">Mês</label>
-                        <input type="number" id="mesValidade" min="1" max="12">
+                    <div class="form-group">
+                        <label for="nome">Nome completo</label>
+                        <input type="text" id="nome">
                     </div>
-                    <div style="flex:1;">
-                        <label for="anoValidade">Ano</label>
-                        <input type="number" id="anoValidade" min="2024" max="2100">
+
+                    <div class="form-group">
+                        <label for="apelido">Apelido</label>
+                        <input type="text" id="apelido" placeholder="Como você prefere ser chamado?">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dataNascimento">Data de nascimento</label>
+                        <input type="date" id="dataNascimento">
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn btn-primary" id="btnSalvarPerfil">Salvar dados</button>
                     </div>
                 </div>
 
-                <div class="btn-row">
-                    <button class="btn btn-primary" id="btnSalvarCartao">Salvar cartão</button>
-                </div>
-            </div>
-        </section>
-    </div>
-</main>
+                <div class="card-perfil">
+                    <h3>Informações Médicas</h3>
 
-<script src="perfil_usuario.js"></script>
+                    <div class="form-group">
+                        <label for="alergias">Alergias</label>
+                        <textarea id="alergias" placeholder="Ex: Dipirona, Ibuprofeno..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="obsMedicas">Observações médicas</label>
+                        <textarea id="obsMedicas"
+                            placeholder="Doenças crônicas, uso contínuo de medicamentos, etc."></textarea>
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn btn-primary" id="btnSalvarMedico">Salvar informações médicas</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Coluna direita: endereços e cartões -->
+            <section>
+                <div class="card-perfil">
+                    <h3>Meus Endereços</h3>
+
+                    <div id="listaEnderecos"></div>
+
+                    <a href="endereco_usuario_novo.html" class="btn btn-primary"
+                        style="margin-top:0.7rem; display:inline-block;">
+                        + Adicionar novo endereço
+                    </a>
+                </div>
+
+                <div class="card-perfil">
+                    <h3>Cartões salvos</h3>
+
+                    <div id="listaCartoes" style="margin-bottom:0.8rem;"></div>
+
+                    <h4 style="font-size:1rem; margin-top:0.8rem;">Adicionar cartão</h4>
+                    <div class="form-group">
+                        <label for="nomeCartao">Nome impresso</label>
+                        <input type="text" id="nomeCartao">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numeroCartao">Número (apenas para mascarar)</label>
+                        <input type="text" id="numeroCartao" placeholder="Digite o número completo">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bandeiraCartao">Bandeira</label>
+                        <input type="text" id="bandeiraCartao" placeholder="Visa, MasterCard...">
+                    </div>
+
+                    <div class="form-group" style="display:flex; gap:0.6rem;">
+                        <div style="flex:1;">
+                            <label for="mesValidade">Mês</label>
+                            <input type="number" id="mesValidade" min="1" max="12">
+                        </div>
+                        <div style="flex:1;">
+                            <label for="anoValidade">Ano</label>
+                            <input type="number" id="anoValidade" min="2024" max="2100">
+                        </div>
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn btn-primary" id="btnSalvarCartao">Salvar cartão</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="perfil_usuario.js"></script>
 </body>
+
 </html>

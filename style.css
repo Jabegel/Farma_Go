@@ -700,3 +700,85 @@ body {
   border-radius: 5px;
   box-sizing: border-box;
 }
+
+.lista-favoritos {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.favorito-item {
+    display: flex;
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px #00000015;
+    align-items: center;
+    gap: 20px;
+}
+
+.favorito-item img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+}
+
+.favorito-item .info {
+    flex: 1;
+}
+
+.favorito-item h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.favorito-item .preco {
+    color: rgb(2, 158, 2);
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.btn-remover, .btn-ver {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.btn-remover {
+    background: #ff4c4c;
+    color: #fff;
+}
+
+.btn-ver {
+    background: #007bff;
+    color: #fff;
+}
+
+.fav-btn {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    color: #888;
+    transition: 0.2s;
+}
+
+.fav-btn:hover {
+    transform: scale(1.2);
+}
+
+.produto-card {
+    position: relative;
+    width: 250px;
+    padding: 15px;
+    margin: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #ddd;
+}

@@ -224,3 +224,12 @@ CREATE TABLE pedidos_itens (
 );
 
 
+CREATE TABLE favoritos (
+    id_favorito INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_produto INT NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_usuario_produto (id_usuario, id_produto),
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id),
+    FOREIGN KEY (id_produto) REFERENCES produtos(id_produto)
+);

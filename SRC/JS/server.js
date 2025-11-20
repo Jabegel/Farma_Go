@@ -598,6 +598,75 @@ app.get("/api/pedidos/:id_usuario", (req, res) => {
 });
 
 /* ============================================================
+   FAVORITOS
+   ============================================================ */
+
+// Listar favoritos do usuário (com dados do produto)
+app.get("/api/favoritos/:id_usuario", (req, res) => {
+  const id = req.params.id_usuario;
+
+  db.query(
+    `SELECT f.id_favorito, p.id_produto, p.nome, p.preco, p.imagem, p.id_farmacia
+     FROM favoritos f
+     JOIN produtos p ON p.id_produto = f.id_produto
+     WHERE f.id_usuario = ?`,
+    [id],
+    (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Erro ao buscar favoritos." });
+      }
+      res.json(rows);
+    }
+  );
+});
+
+// Adicionar favorito
+app.post("/api/favoritos/adicionar", (req, res) => {
+  const { id_usuario, id_produto } = req.body;
+
+  if (!id_usuario || !id_produto) {
+    return res.json({ success: false, message: "Dados inválidos." });
+  }
+
+  db.query(
+    `INSERT INTO favoritos (id_usuario, id_produto)
+     VALUES (?, ?)
+     ON DUPLICATE KEY UPDATE criado_em = NOW()`,
+    [id_usuario, id_produto],
+    (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Erro ao adicionar favorito." });
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+// Remover favorito
+app.delete("/api/favoritos/remover", (req, res) => {
+  const { id_usuario, id_produto } = req.body;
+
+  if (!id_usuario || !id_produto) {
+    return res.json({ success: false, message: "Dados inválidos." });
+  }
+
+  db.query(
+    `DELETE FROM favoritos WHERE id_usuario = ? AND id_produto = ?`,
+    [id_usuario, id_produto],
+    (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Erro ao remover favorito." });
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+
+/* ============================================================
    INICIAR SERVIDOR
    ============================================================ */
 app.listen(3000, () => {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,7 @@
             background: white;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
         }
 
         h2 {
@@ -47,7 +48,8 @@
             gap: 8px;
         }
 
-        .btn-info, .btn-remove {
+        .btn-info,
+        .btn-remove {
             padding: 7px 10px;
             border: none;
             border-radius: 8px;
@@ -93,60 +95,61 @@
 
 <body>
 
-<header class="main-header">
-    <a href="inicio_usuario.html" class="logo">FarmaGo</a>
-    <nav>
-        <a href="carrinho_checkout.html">Carrinho</a>
-        <a href="../LOGINS/login.html">Sair</a>
-    </nav>
-</header>
+    <header class="main-header">
+        <a href="inicio_usuario.html" class="logo">FarmaGo</a>
+        <nav>
+            <a href="carrinho_checkout.html">Carrinho</a>
+            <a href="favoritos.html">Favoritos</a>
+            <a href="../LOGINS/login.html">Sair</a>
+        </nav>
+    </header>
 
-<main>
-    <div class="endereco-page">
+    <main>
+        <div class="endereco-page">
 
-        <h2>Meus Endereços</h2>
+            <h2>Meus Endereços</h2>
 
-        <div id="listaEnderecos">
-            Carregando...
+            <div id="listaEnderecos">
+                Carregando...
+            </div>
+
+            <button class="btn-add" onclick="window.location.href='endereco_usuario_novo.html'">
+                + Adicionar Novo Endereço
+            </button>
+
         </div>
-
-        <button class="btn-add" onclick="window.location.href='endereco_usuario_novo.html'">
-            + Adicionar Novo Endereço
-        </button>
-
-    </div>
-</main>
+    </main>
 
 
-<script>
-    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+    <script>
+        const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
 
-    if (!usuario || !usuario.id) {
-        alert("Você precisa estar logado!");
-        window.location.href = "/SRC/LOGINS/login.html";
-    }
+        if (!usuario || !usuario.id) {
+            alert("Você precisa estar logado!");
+            window.location.href = "/SRC/LOGINS/login.html";
+        }
 
-    // ============================
-    // Carregar todos os endereços
-    // ============================
-    async function carregarEnderecos() {
-        const box = document.getElementById("listaEnderecos");
+        // ============================
+        // Carregar todos os endereços
+        // ============================
+        async function carregarEnderecos() {
+            const box = document.getElementById("listaEnderecos");
 
-        try {
-            const req = await fetch(`http://127.0.0.1:3000/api/enderecos/${usuario.id}`);
-            const enderecos = await req.json();
+            try {
+                const req = await fetch(`http://127.0.0.1:3000/api/enderecos/${usuario.id}`);
+                const enderecos = await req.json();
 
-            if (!enderecos.length) {
-                box.innerHTML = `
+                if (!enderecos.length) {
+                    box.innerHTML = `
                     <p>Você ainda não possui endereços cadastrados.</p>
                 `;
-                return;
-            }
+                    return;
+                }
 
-            box.innerHTML = "";
+                box.innerHTML = "";
 
-            enderecos.forEach(end => {
-                box.innerHTML += `
+                enderecos.forEach(end => {
+                    box.innerHTML += `
                     <div class="endereco-item">
                         <div class="endereco-info">
                             <b>${end.rua}, ${end.numero}</b><br>
@@ -159,23 +162,23 @@
                         </div>
                     </div>
                 `;
-            });
+                });
 
-        } catch (err) {
-            console.log(err);
-            box.innerHTML = "<p>Erro ao carregar endereços.</p>";
+            } catch (err) {
+                console.log(err);
+                box.innerHTML = "<p>Erro ao carregar endereços.</p>";
+            }
         }
-    }
 
-    // ============================
-    // Ver detalhes (!)
-    // ============================
-    async function mostrarDetalhes(id) {
-        try {
-            const req = await fetch(`http://127.0.0.1:3000/api/endereco/${id}`);
-            const e = await req.json();
+        // ============================
+        // Ver detalhes (!)
+        // ============================
+        async function mostrarDetalhes(id) {
+            try {
+                const req = await fetch(`http://127.0.0.1:3000/api/endereco/${id}`);
+                const e = await req.json();
 
-            alert(`
+                alert(`
 📍 Endereço Completo:
 
 Rua: ${e.rua}, Nº ${e.numero}
@@ -185,44 +188,45 @@ CEP: ${e.cep}
 Complemento: ${e.complemento || "(nenhum)"}
             `);
 
-        } catch (err) {
-            alert("Erro ao buscar detalhes.");
-        }
-    }
-
-    // ============================
-    // Remover endereço
-    // ============================
-    async function removerEndereco(id_endereco) {
-        if (!confirm("Deseja realmente remover este endereço?")) return;
-
-        try {
-            const req = await fetch("http://127.0.0.1:3000/api/enderecos/remover", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id_endereco,
-                    id_usuario: usuario.id
-                })
-            });
-
-            const result = await req.json();
-
-            if (result.success) {
-                carregarEnderecos();
-            } else {
-                alert("Não foi possível remover.");
+            } catch (err) {
+                alert("Erro ao buscar detalhes.");
             }
-
-        } catch (err) {
-            console.log(err);
-            alert("Erro ao remover.");
         }
-    }
 
-    // Iniciar tela
-    document.addEventListener("DOMContentLoaded", carregarEnderecos);
-</script>
+        // ============================
+        // Remover endereço
+        // ============================
+        async function removerEndereco(id_endereco) {
+            if (!confirm("Deseja realmente remover este endereço?")) return;
+
+            try {
+                const req = await fetch("http://127.0.0.1:3000/api/enderecos/remover", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id_endereco,
+                        id_usuario: usuario.id
+                    })
+                });
+
+                const result = await req.json();
+
+                if (result.success) {
+                    carregarEnderecos();
+                } else {
+                    alert("Não foi possível remover.");
+                }
+
+            } catch (err) {
+                console.log(err);
+                alert("Erro ao remover.");
+            }
+        }
+
+        // Iniciar tela
+        document.addEventListener("DOMContentLoaded", carregarEnderecos);
+    </script>
 
 </body>
+
 </html>
