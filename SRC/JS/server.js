@@ -19,15 +19,13 @@ const db = mysql.createConnection({
 });
 
 db.connect(err => {
-  if (err) {
-    console.error('❌ Erro ao conectar no MySQL:', err);
-  } else {
-    console.log('✅ Conectado ao MySQL!');
-  }
+  if (err) console.error('❌ Erro ao conectar no MySQL:', err);
+  else console.log('✅ Conectado ao MySQL!');
 });
 
+
 /* ============================================================
-   LOGIN — AGORA RETORNA id_usuario, nome, tipo
+   LOGIN
    ============================================================ */
 app.post('/login', (req, res) => {
   const { login, senha, tipoUsuario } = req.body;
@@ -36,24 +34,18 @@ app.post('/login', (req, res) => {
     return res.status(400).json({ success: false, message: 'Preencha todos os campos.' });
   }
 
-  let query;
-  let params;
+  let query, params;
 
-  // Se tipo informado e não for admin/farmacêutico → validar tipo
   if (tipoUsuario && tipoUsuario !== "admin" && tipoUsuario !== "farmaceutico") {
     query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ? AND tipo = ?';
     params = [login, senha, tipoUsuario];
   } else {
-    // Admin e farmacêutico ignoram tipo do front
     query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ?';
     params = [login, senha];
   }
 
   db.query(query, params, (err, results) => {
-    if (err) {
-      console.error('❌ Erro no banco:', err);
-      return res.status(500).json({ success: false, message: 'Erro no servidor.' });
-    }
+    if (err) return res.status(500).json({ success: false, message: 'Erro no servidor.' });
 
     if (results.length === 0) {
       return res.json({ success: false, message: 'Usuário ou senha incorretos!' });
@@ -61,12 +53,9 @@ app.post('/login', (req, res) => {
 
     const usuario = results[0];
 
-    // Se tipo informado for diferente do BD
     if (tipoUsuario && usuario.tipo !== tipoUsuario) {
       return res.json({ success: false, message: 'Tipo de usuário incorreto!' });
     }
-
-    console.log(`✅ Login bem-sucedido: ${usuario.login} (${usuario.tipo})`);
 
     return res.json({
       success: true,
@@ -77,8 +66,9 @@ app.post('/login', (req, res) => {
   });
 });
 
+
 /* ============================================================
-   CADASTRO (inalterado, apenas organizado)
+   CADASTRO (organizado)
    ============================================================ */
 app.post('/cadastro', (req, res) => {
   const { nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta } = req.body;
@@ -88,118 +78,126 @@ app.post('/cadastro', (req, res) => {
   }
 
   const checkQuery = 'SELECT * FROM cadastros WHERE login_nome = ? OR cpf = ? OR email = ?';
+
   db.query(checkQuery, [loginNome, cpf, email], (err, results) => {
-    if (err) {
-      console.error('❌ Erro no banco:', err);
-      return res.status(500).json({ success: false, message: 'Erro no servidor.' });
-    }
+    if (err) return res.status(500).json({ success: false, message: 'Erro no servidor.' });
 
     if (results.length > 0) {
       return res.json({ success: false, message: 'Usuário, CPF ou e-mail já cadastrados.' });
     }
 
     const insertUser = 'INSERT INTO usuarios (nome, login, senha, tipo) VALUES (?, ?, ?, ?)';
-    db.query(insertUser, [nomeExibicao, loginNome, senha, tipoConta], (err2, userResult) => {
-      if (err2) {
-        console.error('❌ Erro ao criar usuário:', err2);
-        return res.status(500).json({ success: false, message: 'Erro ao criar usuário.' });
-      }
+    db.query(insertUser, [nomeExibicao, loginNome, senha, tipoConta], (err2, resultUser) => {
 
-      const idUsuario = userResult.insertId;
+      if (err2) return res.status(500).json({ success: false, message: 'Erro ao criar usuário.' });
+
+      const idUsuario = resultUser.insertId;
 
       const insertCadastro = `
-        INSERT INTO cadastros 
-        (id_usuario, nome_exibicao, login_nome, cpf, email, senha, data_nascimento, tipo_conta)
+        INSERT INTO cadastros (id_usuario, nome_exibicao, login_nome, cpf, email, senha, data_nascimento, tipo_conta)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
-      db.query(insertCadastro, [idUsuario, nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta], (err3) => {
-        if (err3) {
-          console.error('❌ Erro ao salvar cadastro:', err3);
-          return res.status(500).json({ success: false, message: 'Erro ao salvar cadastro completo.' });
-        }
 
-        console.log(`✅ Novo usuário cadastrado: ${loginNome} (${tipoConta})`);
-        return res.json({ success: true, message: 'Usuário cadastrado com sucesso!' });
-      });
+      db.query(insertCadastro,
+        [idUsuario, nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta],
+        (err3) => {
+
+          if (err3) return res.status(500).json({
+            success: false,
+            message: 'Erro ao salvar cadastro completo.'
+          });
+
+          return res.json({ success: true, message: 'Usuário cadastrado com sucesso!' });
+        });
     });
   });
 });
 
+
 /* ============================================================
-   API: Produtos por farmácia
+   LISTAR PRODUTOS DA FARMÁCIA
    ============================================================ */
 app.get('/api/produtos', (req, res) => {
   const farmaciaId = req.query.farmacia;
+
   if (!farmaciaId) {
     return res.status(400).json({ error: 'Parâmetro farmacia necessário' });
   }
 
-  db.query("SELECT * FROM produtos WHERE id_farmacia = ?", [farmaciaId], (err, results) => {
-    if (err) {
-      console.error("Erro ao buscar produtos:", err);
-      return res.status(500).json({ error: "Erro no servidor" });
+  db.query(`SELECT * FROM produtos WHERE id_farmacia = ?`,
+    [farmaciaId],
+    (err, results) => {
+      if (err) return res.status(500).json({ error: "Erro no servidor" });
+      res.json(results);
     }
-    res.json(results);
-  });
+  );
 });
 
+
 /* ============================================================
-   API: Dados da farmácia
+   LISTAR DADOS DA FARMÁCIA
    ============================================================ */
 app.get('/api/farmacia/:id', (req, res) => {
-  db.query("SELECT * FROM farmacias WHERE id_farmacia = ?", [req.params.id], (err, results) => {
-    if (err) return res.status(500).json({ error: 'Erro no servidor' });
-    res.json(results[0] || {});
-  });
+  db.query(`SELECT * FROM farmacias WHERE id_farmacia = ?`,
+    [req.params.id],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: 'Erro no servidor' });
+      res.json(result[0] || {});
+    }
+  );
 });
 
+
 /* ============================================================
-   API: ADICIONAR AO CARRINHO — AGORA COM id_usuario DO FRONT
+   ADICIONAR AO CARRINHO
    ============================================================ */
 app.post('/api/carrinho/adicionar', (req, res) => {
+
   const { id_usuario, id_produto, quantidade } = req.body;
 
   if (!id_usuario || !id_produto) {
-    return res.status(400).json({
-      success: false,
-      message: 'id_usuario e id_produto são obrigatórios!'
-    });
+    return res.json({ success: false, message: "id_usuario e id_produto obrigatórios" });
   }
 
-  // 1. Verificar se já existe carrinho aberto
   db.query(
-    'SELECT id_carrinho FROM carrinho WHERE id_usuario = ? AND status = "aberto" LIMIT 1',
+    `SELECT id_carrinho FROM carrinho WHERE id_usuario = ? AND status = 'aberto' LIMIT 1`,
     [id_usuario],
     (err, rows) => {
-      if (err) return res.status(500).json({ success: false, message: 'Erro no servidor' });
 
+      if (err) return res.status(500).json({ success: false });
+
+      // função criar item
       const criarItem = (id_carrinho) => {
-        db.query('SELECT preco FROM produtos WHERE id_produto = ?', [id_produto], (err2, prod) => {
-          if (err2 || prod.length === 0) {
-            return res.status(500).json({ success: false, message: 'Produto não encontrado' });
+        db.query(`SELECT preco FROM produtos WHERE id_produto = ?`,
+          [id_produto],
+          (err2, p) => {
+
+            if (err2 || p.length === 0)
+              return res.json({ success: false, message: "Produto não encontrado" });
+
+            db.query(
+              `INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, preco_unitario)
+               VALUES (?, ?, ?, ?)`,
+              [id_carrinho, id_produto, quantidade || 1, p[0].preco],
+              (err3) => {
+
+                if (err3) return res.status(500).json({ success: false });
+
+                res.json({ success: true, message: "Item adicionado!" });
+              }
+            );
           }
-
-          db.query(
-            'INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, preco_unitario) VALUES (?, ?, ?, ?)',
-            [id_carrinho, id_produto, quantidade || 1, prod[0].preco],
-            (err3) => {
-              if (err3) return res.status(500).json({ success: false, message: 'Erro ao adicionar item' });
-
-              return res.json({ success: true, message: 'Produto adicionado ao carrinho!' });
-            }
-          );
-        });
+        );
       };
 
-      if (rows.length > 0) {
+      if (rows.length > 0)
         criarItem(rows[0].id_carrinho);
-      } else {
-        // Criar carrinho novo
+      else {
         db.query(
-          'INSERT INTO carrinho (id_usuario, status) VALUES (?, "aberto")',
+          `INSERT INTO carrinho (id_usuario, status) VALUES (?, 'aberto')`,
           [id_usuario],
           (err4, r) => {
-            if (err4) return res.status(500).json({ success: false, message: 'Erro ao criar carrinho' });
+            if (err4) return res.status(500).json({ success: false });
             criarItem(r.insertId);
           }
         );
@@ -208,12 +206,39 @@ app.post('/api/carrinho/adicionar', (req, res) => {
   );
 });
 
+
 /* ============================================================
-   SUAS ROTAS ADMIN ORIGINAIS (não mexi em nada)
+   🔥 ROTA NOVA — BUSCAR ITENS DO CARRINHO
    ============================================================ */
-/* ... (todas as rotas admin que você enviou continuam aqui) ... */
+app.get('/api/carrinho/:id_usuario', (req, res) => {
+
+  db.query(`
+      SELECT 
+        c.id_carrinho,
+        i.id_produto,
+        p.nome,
+        p.preco,
+        i.quantidade,
+        (i.quantidade * i.preco_unitario) AS subtotal
+      FROM carrinho c
+      LEFT JOIN carrinho_itens i ON c.id_carrinho = i.id_carrinho
+      LEFT JOIN produtos p ON i.id_produto = p.id_produto
+      WHERE c.id_usuario = ? AND c.status = 'aberto'
+  `,
+    [req.params.id_usuario],
+    (err, rows) => {
+
+      if (err) return res.status(500).json({ error: "Erro no servidor" });
+
+      res.json(rows);
+    }
+  );
+});
+
 
 /* ============================================================
    INICIAR SERVIDOR
    ============================================================ */
-app.listen(3000, () => console.log('🚀 Servidor rodando em http://127.0.0.1:3000'));
+app.listen(3000, () =>
+  console.log('🚀 Servidor rodando em http://127.0.0.1:3000')
+);
