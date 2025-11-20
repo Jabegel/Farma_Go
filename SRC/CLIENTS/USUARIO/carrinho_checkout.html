@@ -1,72 +1,72 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FarmaGo - Checkout</title>
-  <link rel="stylesheet" href="../style.css"> </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmaGo - Checkout</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
 <body>
 
-  <header class="main-header">
-    <a href="inicio_usuario.html" class="logo">FarmaGo</a>
-    <nav>
-      <a href="../login.html">Sair</a>
-    </nav>
-  </header>
+    <header class="main-header">
+        <a href="inicio_usuario.html" class="logo">FarmaGo</a>
+        <nav>
+            <a href="favoritos.html">Favoritos</a>
+            <a href="../LOGINS/login.html">Sair</a>
+        </nav>
+    </header>
 
-  <main class="container">
-    <h2>Finalizar Pedido</h2>
-    
-    <div class="checkout-layout">
-      
-      <section class="checkout-form">
-        <h3>Endereço de Entrega</h3>
-        <div class="form-group">
-          <input type="radio" id="end1" name="endereco" checked>
-          <label for="end1">Casa (Rua das Flores, 123, Centro)</label>
-        </div>
-        <div class="form-group">
-          <input type="radio" id="end2" name="endereco">
-          <label for="end2">Trabalho (Av. Principal, 456, Bloco B)</label>
-        </div>
-        <a href="#">+ Adicionar novo endereço</a>
+    <main class="container">
+        <h2>Finalizar Pedido</h2>
 
-        <h3 style="margin-top: 2rem;">Forma de Pagamento</h3>
-        <div class="form-group">
-          <input type="radio" id="pag1" name="pagamento" checked>
-          <label for="pag1">Pix</label>
-        </div>
-        <div class="form-group">
-          <input type="radio" id="pag2" name="pagamento">
-          <label for="pag2">Cartão de Crédito (na entrega)</label>
-        </div>
-      </section>
+        <div class="checkout-layout">
 
-      <aside class="checkout-summary">
-        <h3>Resumo do Pedido</h3>
-        <ul>
-          <li>
-            <span>Dipirona 500mg (1x)</span>
-            <strong>R$ 12,50</strong>
-          </li>
-          <li>
-            <span>Protetor Solar FPS 30 (1x)</span>
-            <strong>R$ 45,90</strong>
-          </li>
-          <li>
-            <span>Taxa de Entrega</span>
-            <strong>R$ 5,00</strong>
-          </li>
-          <li class="total">
-            <span>Total</span>
-            <strong>R$ 63,40</strong>
-          </li>
-        </ul>
-        <a href="pedido_confirmado.html" class="btn btn-primary">Confirmar Pedido</a>
-      </aside>
+            <!-- ========== ENDEREÇOS DINÂMICOS ========== -->
+            <section class="checkout-form">
+                <h3>Endereço de Entrega</h3>
 
-    </div>
-  </main>
+                <div id="listaEnderecos">Carregando endereços...</div>
+
+                <a href="/SRC/CLIENTS/USUARIO/endereco_usuario_novo.html">+ Adicionar novo endereço</a>
+
+                <h3 style="margin-top:2rem;">Forma de Pagamento</h3>
+
+                <div class="form-group">
+                    <input type="radio" name="pagamento" value="pix" checked onclick="ocultarCartoes()">
+                    <label>Pix</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="radio" name="pagamento" value="cartao" onclick="carregarCartoes()">
+                    <label>Cartão de Crédito</label>
+                </div>
+
+                <!-- cartões carregados -->
+                <div id="cartoesBox" style="margin-left: 25px; margin-top: 10px;"></div>
+
+                <!-- preview -->
+                <div id="previewPagamento" style="margin-top: 15px; font-size: 14px; color: #333;"></div>
+
+
+            </section>
+
+            <!-- ========== RESUMO DINÂMICO DO PEDIDO ========== -->
+            <aside class="checkout-summary">
+                <h3>Resumo do Pedido</h3>
+                <ul class="checkout-list"></ul>
+
+                <button id="btnConfirmarPedido" class="btn btn-primary">
+                    Confirmar Pedido
+                </button>
+            </aside>
+
+        </div>
+    </main>
+
+    <script src="script_checkout.js"></script>
 
 </body>
+
 </html>

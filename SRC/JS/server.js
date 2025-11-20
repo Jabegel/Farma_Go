@@ -1,14 +1,17 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const path = require('path');
+const multer = require('multer'); // npm i multer
 
 const app = express();
 app.use(express.json());
-
-// Permitir requisições do frontend
 app.use(cors({
   origin: "http://127.0.0.1:5500"
 }));
+
+// servir arquivos estáticos de uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Conexão com o banco
 const db = mysql.createConnection({
@@ -19,14 +22,13 @@ const db = mysql.createConnection({
 });
 
 db.connect(err => {
-  if (err) {
-    console.error('❌ Erro ao conectar no MySQL:', err);
-  } else {
-    console.log('✅ Conectado ao MySQL!');
-  }
+  if (err) console.error('❌ Erro ao conectar no MySQL:', err);
+  else console.log('✅ Conectado ao MySQL!');
 });
 
-// Rota de login
+/* ============================================================
+   LOGIN
+   ============================================================ */
 app.post('/login', (req, res) => {
   const { login, senha, tipoUsuario } = req.body;
 
@@ -34,24 +36,18 @@ app.post('/login', (req, res) => {
     return res.status(400).json({ success: false, message: 'Preencha todos os campos.' });
   }
 
-  let query;
-  let params;
+  let query, params;
 
-  // Se o tipo foi selecionado no checkbox (cliente, farmacia, entregador)
   if (tipoUsuario && tipoUsuario !== "admin" && tipoUsuario !== "farmaceutico") {
     query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ? AND tipo = ?';
     params = [login, senha, tipoUsuario];
   } else {
-    // Para admin e farmacêutico — ignora o tipo vindo do front
     query = 'SELECT * FROM usuarios WHERE login = ? AND senha = ?';
     params = [login, senha];
   }
 
   db.query(query, params, (err, results) => {
-    if (err) {
-      console.error('❌ Erro no banco:', err);
-      return res.status(500).json({ success: false, message: 'Erro no servidor.' });
-    }
+    if (err) return res.status(500).json({ success: false, message: 'Erro no servidor.' });
 
     if (results.length === 0) {
       return res.json({ success: false, message: 'Usuário ou senha incorretos!' });
@@ -59,28 +55,37 @@ app.post('/login', (req, res) => {
 
     const usuario = results[0];
 
-    // Se o tipo não foi informado (caso admin ou farmaceutico)
-    if (!tipoUsuario && (usuario.tipo === "admin" || usuario.tipo === "farmaceutico")) {
-      console.log(`✅ Login bem-sucedido: ${usuario.login} (${usuario.tipo})`);
-      return res.json({ success: true, tipo: usuario.tipo });
-    }
-
-    // Se o tipo informado for diferente do banco
     if (tipoUsuario && usuario.tipo !== tipoUsuario) {
       return res.json({ success: false, message: 'Tipo de usuário incorreto!' });
     }
 
-    console.log(`✅ Login bem-sucedido: ${usuario.login} (${usuario.tipo})`);
-    return res.json({ success: true, tipo: usuario.tipo });
+    return res.json({
+      success: true,
+      id_usuario: usuario.id,
+      nome: usuario.nome,
+      tipo: usuario.tipo
+    });
   });
 });
 
-// Inicializar servidor
-app.listen(3000, () => console.log('🚀 Servidor rodando em http://127.0.0.1:3000'));
+/* ============================================================
+   UPLOAD (FOTO PERFIL)
+   ============================================================ */
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, 'uploads'));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const nome = `user_${Date.now()}${ext}`;
+    cb(null, nome);
+  }
+});
+const upload = multer({ storage });
 
-
-
-// Rota de cadastro
+/* ============================================================
+   CADASTRO
+   ============================================================ */
 app.post('/cadastro', (req, res) => {
   const { nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta } = req.body;
 
@@ -88,349 +93,582 @@ app.post('/cadastro', (req, res) => {
     return res.status(400).json({ success: false, message: 'Preencha todos os campos.' });
   }
 
-  // Verifica duplicidade
   const checkQuery = 'SELECT * FROM cadastros WHERE login_nome = ? OR cpf = ? OR email = ?';
+
   db.query(checkQuery, [loginNome, cpf, email], (err, results) => {
-    if (err) {
-      console.error('❌ Erro no banco:', err);
-      return res.status(500).json({ success: false, message: 'Erro no servidor.' });
-    }
+    if (err) return res.status(500).json({ success: false, message: 'Erro no servidor.' });
 
     if (results.length > 0) {
       return res.json({ success: false, message: 'Usuário, CPF ou e-mail já cadastrados.' });
     }
 
-    // Cria o usuário base na tabela `usuarios`
     const insertUser = 'INSERT INTO usuarios (nome, login, senha, tipo) VALUES (?, ?, ?, ?)';
-    db.query(insertUser, [nomeExibicao, loginNome, senha, tipoConta], (err2, userResult) => {
-      if (err2) {
-        console.error('❌ Erro ao criar usuário:', err2);
-        return res.status(500).json({ success: false, message: 'Erro ao criar usuário.' });
-      }
+    db.query(insertUser, [nomeExibicao, loginNome, senha, tipoConta], (err2, resultUser) => {
+      if (err2) return res.status(500).json({ success: false, message: 'Erro ao criar usuário.' });
 
-      const idUsuario = userResult.insertId;
+      const idUsuario = resultUser.insertId;
 
-      // Cria o cadastro completo na tabela `cadastros`
       const insertCadastro = `
-        INSERT INTO cadastros 
-        (id_usuario, nome_exibicao, login_nome, cpf, email, senha, data_nascimento, tipo_conta)
+        INSERT INTO cadastros (id_usuario, nome_exibicao, login_nome, cpf, email, senha, data_nascimento, tipo_conta)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
-      db.query(insertCadastro, [idUsuario, nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta], (err3) => {
-        if (err3) {
-          console.error('❌ Erro ao salvar cadastro:', err3);
-          return res.status(500).json({ success: false, message: 'Erro ao salvar cadastro completo.' });
-        }
 
-        console.log(`✅ Novo usuário cadastrado: ${loginNome} (${tipoConta})`);
-        return res.json({ success: true, message: 'Usuário cadastrado com sucesso!' });
-      });
+      db.query(
+        insertCadastro,
+        [idUsuario, nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta],
+        (err3) => {
+          if (err3) {
+            return res.status(500).json({
+              success: false,
+              message: 'Erro ao salvar cadastro completo.'
+            });
+          }
+
+          return res.json({ success: true, message: 'Usuário cadastrado com sucesso!' });
+        }
+      );
     });
   });
 });
 
-// ===========================
-// ROTAS ADMIN → FARMÁCIAS
-// ===========================
+/* ============================================================
+   PRODUTOS + FARMÁCIA
+   ============================================================ */
+app.get('/api/produtos', (req, res) => {
+  const farmaciaId = req.query.farmacia;
 
-// Listar todas as farmácias
-app.get('/admin/farmacias', (req, res) => {
-  const query = 'SELECT * FROM farmacias';
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('❌ Erro ao buscar farmácias:', err);
-      return res.status(500).json({ message: 'Erro ao buscar farmácias' });
-    }
+  if (!farmaciaId) {
+    return res.status(400).json({ error: 'Parâmetro farmacia necessário' });
+  }
+
+  db.query('SELECT * FROM produtos WHERE id_farmacia = ?', [farmaciaId], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Erro no servidor' });
     res.json(results);
   });
 });
 
-// Atualizar dados da farmácia
-app.put('/admin/farmacias/:id', (req, res) => {
-  const { id } = req.params;
-  const { nome, endereco, cep, cnpj, telefone, email } = req.body;
-
-  const query = `
-    UPDATE farmacias 
-    SET nome = ?, endereco = ?, cep = ?, cnpj = ?, telefone = ?, email = ?
-    WHERE id_farmacia = ?
-  `;
-  db.query(query, [nome, endereco, cep, cnpj, telefone, email, id], (err, result) => {
-    if (err) {
-      console.error('❌ Erro ao atualizar farmácia:', err);
-      return res.status(500).json({ message: 'Erro ao atualizar farmácia' });
-    }
-    res.json({ success: true, message: 'Farmácia atualizada com sucesso!' });
-  });
-});
-
-// Excluir farmácia
-app.delete('/admin/farmacias/:id', (req, res) => {
-  const { id } = req.params;
-
-  db.query('DELETE FROM farmacias WHERE id_farmacia = ?', [id], (err, result) => {
-    if (err) {
-      console.error('❌ Erro ao excluir farmácia:', err);
-      return res.status(500).json({ message: 'Erro ao excluir farmácia' });
-    }
-    res.json({ success: true, message: 'Farmácia excluída com sucesso!' });
-  });
-});
-
-// ===========================
-// ROTAS ADMIN → USUÁRIOS
-// ===========================
-
-// Listar todos os usuários
-app.get('/admin/usuarios', (req, res) => {
-  db.query('SELECT id, nome, login, email, tipo FROM usuarios', (err, results) => {
-    if (err) {
-      console.error('❌ Erro ao buscar usuários:', err);
-      return res.status(500).json({ message: 'Erro ao buscar usuários' });
-    }
-    res.json(results);
-  });
-});
-
-// Atualizar usuário
-app.put('/admin/usuarios/:id', (req, res) => {
-  const { id } = req.params;
-  const { nome, login, email, tipo } = req.body;
-
-  const query = `
-    UPDATE usuarios 
-    SET nome = ?, login = ?, email = ?, tipo = ?
-    WHERE id = ?
-  `;
-  db.query(query, [nome, login, email, tipo, id], (err, result) => {
-    if (err) {
-      console.error('❌ Erro ao atualizar usuário:', err);
-      return res.status(500).json({ message: 'Erro ao atualizar usuário' });
-    }
-    res.json({ success: true, message: 'Usuário atualizado com sucesso!' });
-  });
-});
-
-// Excluir usuário
-app.delete('/admin/usuarios/:id', (req, res) => {
-  const { id } = req.params;
-
-  db.query('DELETE FROM usuarios WHERE id = ?', [id], (err, result) => {
-    if (err) {
-      console.error('❌ Erro ao excluir usuário:', err);
-      return res.status(500).json({ message: 'Erro ao excluir usuário' });
-    }
-    res.json({ success: true, message: 'Usuário excluído com sucesso!' });
-  });
-});
-
-
-// ===========================
-// ROTAS ADMIN → ENTREGADORES
-// ===========================
-
-// Listar entregadores
-app.get('/admin/entregadores', (req, res) => {
-  db.query('SELECT * FROM entregadores', (err, results) => {
-    if (err) {
-      console.error('❌ Erro ao buscar entregadores:', err);
-      return res.status(500).json({ message: 'Erro ao buscar entregadores' });
-    }
-    res.json(results);
-  });
-});
-
-// Atualizar entregador
-app.put('/admin/entregadores/:id', (req, res) => {
-  const { id } = req.params;
-  const { nome, login, cpf, telefone, veiculo, email } = req.body;
-
-  const query = `
-    UPDATE entregadores
-    SET nome = ?, login = ?, cpf = ?, telefone = ?, veiculo = ?, email = ?
-    WHERE id_entregador = ?
-  `;
-  db.query(query, [nome, login, cpf, telefone, veiculo, email, id], (err, result) => {
-    if (err) {
-      console.error('❌ Erro ao atualizar entregador:', err);
-      return res.status(500).json({ message: 'Erro ao atualizar entregador' });
-    }
-    res.json({ success: true, message: 'Entregador atualizado com sucesso!' });
-  });
-});
-
-// Excluir entregador
-app.delete('/admin/entregadores/:id', (req, res) => {
-  const { id } = req.params;
-
-  db.query('DELETE FROM entregadores WHERE id_entregador = ?', [id], (err, result) => {
-    if (err) {
-      console.error('❌ Erro ao excluir entregador:', err);
-      return res.status(500).json({ message: 'Erro ao excluir entregador' });
-    }
-    res.json({ success: true, message: 'Entregador excluído com sucesso!' });
-  });
-});
-
-// ===========================
-// ROTAS ADMIN → FARMACÊUTICOS
-// ===========================
-
-// Listar farmacêuticos
-app.get('/admin/farmaceuticos', (req, res) => {
-  db.query('SELECT * FROM farmaceuticos', (err, results) => {
-    if (err) {
-      console.error('❌ Erro ao buscar farmacêuticos:', err);
-      return res.status(500).json({ message: 'Erro ao buscar farmacêuticos' });
-    }
-    res.json(results);
-  });
-});
-
-// Atualizar farmacêutico
-app.put('/admin/farmaceuticos/:id', (req, res) => {
-  const { id } = req.params;
-  const { nome, login, crm, email } = req.body;
-
+app.get('/api/farmacia/:id', (req, res) => {
   db.query(
-    'UPDATE farmaceuticos SET nome=?, login=?, crm=?, email=? WHERE id_farmaceutico=?',
-    [nome, login, crm, email, id],
+    'SELECT * FROM farmacias WHERE id_farmacia = ?',
+    [req.params.id],
     (err, result) => {
-      if (err) {
-        console.error('❌ Erro ao atualizar farmacêutico:', err);
-        return res.status(500).json({ message: 'Erro ao atualizar farmacêutico' });
-      }
-      res.json({ success: true, message: 'Farmacêutico atualizado com sucesso!' });
+      if (err) return res.status(500).json({ error: 'Erro no servidor' });
+      res.json(result[0] || {});
     }
   );
 });
 
-// Excluir farmacêutico
-app.delete('/admin/farmaceuticos/:id', (req, res) => {
-  const { id } = req.params;
-  db.query('DELETE FROM farmaceuticos WHERE id_farmaceutico=?', [id], (err) => {
-    if (err) {
-      console.error('❌ Erro ao excluir farmacêutico:', err);
-      return res.status(500).json({ message: 'Erro ao excluir farmacêutico' });
-    }
-    res.json({ success: true, message: 'Farmacêutico excluído com sucesso!' });
-  });
-});
+/* ============================================================
+   CARRINHO
+   ============================================================ */
+// adicionar item
+app.post('/api/carrinho/adicionar', (req, res) => {
+  const { id_usuario, id_produto, quantidade } = req.body;
 
-// ===========================
-// ROTAS ADMIN → RECEITAS
-// ===========================
-
-// Listar receitas aceitas
-app.get('/admin/receitas', (req, res) => {
-  const query = `
-    SELECT r.id_receita, r.nome_medicamento, r.quantidade, r.data_aceite,
-           f.nome AS nome_farmaceutico, f.crm
-    FROM receitas r
-    JOIN farmaceuticos f ON r.farmaceutico_id = f.id_farmaceutico
-    ORDER BY r.data_aceite DESC;
-  `;
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('❌ Erro ao buscar receitas:', err);
-      return res.status(500).json({ message: 'Erro ao buscar receitas' });
-    }
-    res.json(results);
-  });
-});
-
-
-// ===========================
-// ROTAS ADMIN → COMPRAS DE USUÁRIOS
-// ===========================
-
-// Listar compras
-app.get('/admin/compras', (req, res) => {
-  const query = `
-    SELECT c.id_compra, c.item, c.quantidade, c.data_compra,
-           u.nome AS usuario_nome, f.nome AS farmacia_nome
-    FROM compras c
-    JOIN usuarios u ON c.id_usuario = u.id
-    JOIN farmacias f ON c.id_farmacia = f.id_farmacia
-    ORDER BY c.data_compra DESC;
-  `;
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('❌ Erro ao buscar compras:', err);
-      return res.status(500).json({ message: 'Erro ao buscar compras' });
-    }
-    res.json(results);
-  });
-});
-
-// =============================
-// Funcionalidades da Página de Compras (usuarios_compras_admin.html)
-// =============================
-
-
-async function carregarCompras() {
-  const resposta = await fetch("http://127.0.0.1:3000/admin/compras");
-  const compras = await resposta.json();
-
-  const tbody = document.getElementById("listaCompras");
-  tbody.innerHTML = "";
-
-  compras.forEach(c => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${c.usuario_nome}</td>
-      <td>${c.farmacia_nome}</td>
-      <td>${c.item}</td>
-      <td>${c.quantidade}</td>
-      <td>${new Date(c.data_compra).toLocaleString()}</td>
-      <td><button class="btn btn-sm btn-info text-white" onclick="verDetalhesCompra(${c.id_compra})"><i class="bi bi-exclamation-circle"></i></button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-async function verDetalhesCompra(id) {
-  const resposta = await fetch("http://127.0.0.1:3000/admin/compras");
-  const compras = await resposta.json();
-  const c = compras.find(x => x.id_compra === id);
-
-  const conteudo = `
-    <p><strong>Usuário:</strong> ${c.usuario_nome}</p>
-    <p><strong>Farmácia:</strong> ${c.farmacia_nome}</p>
-    <p><strong>Item:</strong> ${c.item}</p>
-    <p><strong>Quantidade:</strong> ${c.quantidade}</p>
-    <p><strong>Data:</strong> ${new Date(c.data_compra).toLocaleString()}</p>
-  `;
-
-  document.getElementById("detalheCompraConteudo").innerHTML = conteudo;
-
-  const modal = new bootstrap.Modal(document.getElementById("detalheCompraModal"));
-  modal.show();
-}
-
-
-// ===========================
-// ROTA GERAL → REGISTRAR COMPRA
-// ===========================
-app.post('/comprar', (req, res) => {
-  const { id_usuario, id_farmacia, item, quantidade } = req.body;
-
-  if (!id_usuario || !id_farmacia || !item || !quantidade) {
-    return res.status(400).json({ success: false, message: 'Dados incompletos da compra.' });
+  if (!id_usuario || !id_produto) {
+    return res.json({ success: false, message: 'id_usuario e id_produto obrigatórios' });
   }
 
-  const query = `
-    INSERT INTO compras (id_usuario, id_farmacia, item, quantidade)
-    VALUES (?, ?, ?, ?)
-  `;
+  const qtd = quantidade && quantidade > 0 ? quantidade : 1;
 
-  db.query(query, [id_usuario, id_farmacia, item, quantidade], (err, result) => {
-    if (err) {
-      console.error('❌ Erro ao registrar compra:', err);
-      return res.status(500).json({ success: false, message: 'Erro ao registrar compra.' });
+  db.query(
+    'SELECT id_carrinho FROM carrinho WHERE id_usuario = ? AND status = "aberto" LIMIT 1',
+    [id_usuario],
+    (err, rows) => {
+      if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar carrinho.' });
+
+      const continuar = (id_carrinho) => {
+        db.query(
+          'SELECT quantidade FROM carrinho_itens WHERE id_carrinho = ? AND id_produto = ? LIMIT 1',
+          [id_carrinho, id_produto],
+          (errSel, itens) => {
+            if (errSel) return res.status(500).json({ success: false });
+
+            if (itens.length > 0) {
+              db.query(
+                'UPDATE carrinho_itens SET quantidade = quantidade + ? WHERE id_carrinho = ? AND id_produto = ?',
+                [qtd, id_carrinho, id_produto]
+              );
+              return res.json({ success: true, message: 'Quantidade atualizada!' });
+            } else {
+              db.query(
+                'SELECT preco FROM produtos WHERE id_produto = ?',
+                [id_produto],
+                (errProd, p) => {
+                  if (errProd || p.length === 0) {
+                    return res.json({ success: false, message: 'Produto não encontrado.' });
+                  }
+                  db.query(
+                    `INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, preco_unitario)
+                     VALUES (?, ?, ?, ?)`,
+                    [id_carrinho, id_produto, qtd, p[0].preco]
+                  );
+                  return res.json({ success: true, message: 'Item adicionado!' });
+                }
+              );
+            }
+          }
+        );
+      };
+
+      if (rows.length > 0) continuar(rows[0].id_carrinho);
+      else {
+        db.query(
+          'INSERT INTO carrinho (id_usuario, status) VALUES (?, "aberto")',
+          [id_usuario],
+          (errCar, resultCar) => {
+            continuar(resultCar.insertId);
+          }
+        );
+      }
+    }
+  );
+});
+
+// pegar itens do carrinho
+app.get('/api/carrinho/:id_usuario', (req, res) => {
+  const id_usuario = req.params.id_usuario;
+
+  db.query(
+    `SELECT * FROM carrinho WHERE id_usuario = ? AND status = 'aberto' LIMIT 1`,
+    [id_usuario],
+    (err, carrinho) => {
+      if (carrinho.length === 0) {
+        db.query(
+          `INSERT INTO carrinho (id_usuario, status) VALUES (?, 'aberto')`,
+          [id_usuario]
+        );
+        return res.json([]);
+      }
+
+      const id_carrinho = carrinho[0].id_carrinho;
+
+      db.query(
+        `
+        SELECT 
+            c.id_carrinho,
+            i.id_produto,
+            p.nome,
+            i.quantidade,
+            i.preco_unitario,
+            CAST(i.quantidade * i.preco_unitario AS DECIMAL(10,2)) AS subtotal
+        FROM carrinho c
+        LEFT JOIN carrinho_itens i ON c.id_carrinho = i.id_carrinho
+        LEFT JOIN produtos p ON i.id_produto = p.id_produto
+        WHERE c.id_carrinho = ?
+        `,
+        [id_carrinho],
+        (err3, itens) => {
+          itens = itens.map(i => ({
+            ...i,
+            preco_unitario: Number(i.preco_unitario),
+            subtotal: Number(i.subtotal)
+          }));
+          res.json(itens);
+        }
+      );
+    }
+  );
+});
+
+/* ============================================================
+   QTD + REMOVER
+   ============================================================ */
+app.post('/api/carrinho/addQtd', (req, res) => {
+  const { id_usuario, id_produto } = req.body;
+
+  db.query(
+    `
+    UPDATE carrinho_itens ci
+    JOIN carrinho c ON ci.id_carrinho = c.id_carrinho
+    SET ci.quantidade = ci.quantidade + 1
+    WHERE c.id_usuario = ? AND ci.id_produto = ? AND c.status = 'aberto'
+    `,
+    [id_usuario, id_produto]
+  );
+  res.json({ success: true });
+});
+
+app.post('/api/carrinho/removeQtd', (req, res) => {
+  const { id_usuario, id_produto } = req.body;
+
+  db.query(
+    `
+    UPDATE carrinho_itens ci
+    JOIN carrinho c ON ci.id_carrinho = c.id_carrinho
+    SET ci.quantidade = ci.quantidade - 1
+    WHERE c.id_usuario = ? 
+      AND ci.id_produto = ? 
+      AND ci.quantidade > 1
+      AND c.status = 'aberto'
+    `,
+    [id_usuario, id_produto]
+  );
+  res.json({ success: true });
+});
+
+// remover
+function removerItemHandler(req, res) {
+  const { id_usuario, id_produto } = req.body;
+
+  db.query(
+    `
+    DELETE ci FROM carrinho_itens ci
+    JOIN carrinho c ON c.id_carrinho = ci.id_carrinho
+    WHERE c.id_usuario = ? 
+      AND ci.id_produto = ? 
+      AND c.status = 'aberto'
+    `,
+    [id_usuario, id_produto]
+  );
+  res.json({ success: true });
+}
+
+app.delete('/api/carrinho/removerItem', removerItemHandler);
+
+/* ============================================================
+   ENDEREÇOS
+   ============================================================ */
+app.post('/api/enderecos/adicionar', (req, res) => {
+  const { id_usuario, cep, rua, numero, bairro, cidade, estado, complemento } = req.body;
+
+  if (!id_usuario || !cep || !rua || !numero || !bairro || !cidade || !estado) {
+    return res.json({ success: false, message: "Dados incompletos." });
+  }
+
+  db.query(
+    `
+    INSERT INTO enderecos 
+    (id_usuario, cep, rua, numero, bairro, cidade, estado, complemento)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    [id_usuario, cep, rua, numero, bairro, cidade, estado, complemento || ""]
+  );
+  res.json({ success: true });
+});
+
+app.get('/api/enderecos/:id_usuario', (req, res) => {
+  db.query(
+    `
+    SELECT * FROM enderecos 
+    WHERE id_usuario = ?
+    ORDER BY id_endereco DESC
+    `,
+    [req.params.id_usuario],
+    (err, rows) => res.json(rows)
+  );
+});
+
+app.delete('/api/enderecos/remover', (req, res) => {
+  const { id_endereco, id_usuario } = req.body;
+
+  db.query(
+    `
+    DELETE FROM enderecos 
+    WHERE id_endereco = ? AND id_usuario = ?
+    `,
+    [id_endereco, id_usuario]
+  );
+  res.json({ success: true });
+});
+
+/* ============================================================
+   PERFIL DO USUÁRIO
+   ============================================================ */
+app.get("/api/usuario/:id", (req, res) => {
+  const id = req.params.id;
+
+  db.query(
+    `
+    SELECT id, nome, apelido, email, tipo, 
+           DATE(data_nascimento) AS data_nascimento,
+           alergias, obs_medicas, foto_perfil
+    FROM usuarios WHERE id = ?
+    `,
+    [id],
+    (err, rows) => res.json(rows[0] || {})
+  );
+});
+
+app.put("/api/usuario/atualizar", (req, res) => {
+  const { id_usuario, nome, apelido, data_nascimento } = req.body;
+
+  db.query(
+    `
+    UPDATE usuarios 
+    SET nome = ?, apelido = ?, data_nascimento = ?
+    WHERE id = ?
+    `,
+    [nome || null, apelido || null, data_nascimento || null, id_usuario]
+  );
+  res.json({ success: true });
+});
+
+app.put("/api/usuario/medico", (req, res) => {
+  const { id_usuario, alergias, obs_medicas } = req.body;
+
+  db.query(
+    `
+    UPDATE usuarios 
+    SET alergias = ?, obs_medicas = ?
+    WHERE id = ?
+    `,
+    [alergias || null, obs_medicas || null, id_usuario]
+  );
+  res.json({ success: true });
+});
+
+app.post("/api/usuario/foto", upload.single("foto"), (req, res) => {
+  const id_usuario = req.body.id_usuario;
+
+  const caminho = `uploads/${req.file.filename}`;
+
+  db.query(
+    `UPDATE usuarios SET foto_perfil = ? WHERE id = ?`,
+    [caminho, id_usuario]
+  );
+  res.json({ success: true, foto: caminho });
+});
+
+/* ============================================================
+   CARTÕES
+   ============================================================ */
+app.get("/api/cartoes/:id_usuario", (req, res) => {
+  db.query(
+    `SELECT * FROM cartoes WHERE id_usuario = ? ORDER BY criado_em DESC`,
+    [req.params.id_usuario],
+    (err, rows) => res.json(rows)
+  );
+});
+
+app.post("/api/cartoes/adicionar", (req, res) => {
+  const { id_usuario, nome_impresso, numero_mascarado, bandeira, validade_mes, validade_ano } = req.body;
+
+  db.query(
+    `
+    INSERT INTO cartoes 
+    (id_usuario, nome_impresso, numero_mascarado, bandeira, validade_mes, validade_ano)
+    VALUES (?, ?, ?, ?, ?, ?)
+    `,
+    [id_usuario, nome_impresso, numero_mascarado, bandeira, validade_mes, validade_ano]
+  );
+  res.json({ success: true });
+});
+
+app.delete("/api/cartoes/remover", (req, res) => {
+  const { id_cartao, id_usuario } = req.body;
+
+  db.query(
+    `DELETE FROM cartoes WHERE id_cartao = ? AND id_usuario = ?`,
+    [id_cartao, id_usuario]
+  );
+  res.json({ success: true });
+});
+
+
+/* ============================================================
+   FINALIZAR PEDIDO COMPLETO — COM FARMÁCIAS E SALVANDO NO BD
+   ============================================================ */
+app.post("/api/pedido/finalizar", (req, res) => {
+    const { id_usuario, pagamento, id_cartao } = req.body;
+
+    if (!id_usuario) {
+        return res.json({ success: false, message: "Usuário inválido." });
     }
 
-    console.log(`🛒 Nova compra registrada -> Usuário ${id_usuario} comprou ${quantidade}x ${item}`);
-    res.json({ success: true, message: 'Compra registrada com sucesso!' });
-  });
+    // Buscar carrinho aberto
+    db.query(
+        `SELECT * FROM carrinho WHERE id_usuario = ? AND status = 'aberto' LIMIT 1`,
+        [id_usuario],
+        (err, carr) => {
+            if (err || carr.length === 0)
+                return res.json({ success: false, message: "Carrinho vazio." });
+
+            const id_carrinho = carr[0].id_carrinho;
+
+            // Pegar itens do carrinho
+            db.query(
+                `SELECT ci.*, p.nome, p.id_farmacia, p.preco 
+                 FROM carrinho_itens ci
+                 JOIN produtos p ON p.id_produto = ci.id_produto
+                 WHERE id_carrinho = ?`,
+                [id_carrinho],
+                (err2, itens) => {
+                    if (err2 || itens.length === 0)
+                        return res.json({ success: false, message: "Carrinho vazio." });
+
+                    // Farmácias distintas
+                    const farmacias = [...new Set(itens.map(i => i.id_farmacia))];
+
+                    const valuesFarmacias = farmacias.map(id => ({ id_farmacia: id }));
+
+                    // Buscar nomes
+                    db.query(
+                        `SELECT id_farmacia, nome FROM farmacias WHERE id_farmacia IN (?)`,
+                        [farmacias],
+                        (err3, listaFarmacias) => {
+
+                            const pedidoId = Date.now(); // único
+
+                            const total = itens.reduce(
+                                (sum, i) => sum + i.preco * i.quantidade,
+                                0
+                            ) + 10;
+
+                            // Inserir pedido
+                            db.query(
+                                `INSERT INTO pedidos (id_pedido, id_usuario, pagamento, id_cartao, total)
+                                 VALUES (?, ?, ?, ?, ?)`,
+                                [pedidoId, id_usuario, pagamento, id_cartao || null, total],
+                                (err4) => {
+                                    if (err4)
+                                        return res.json({ success: false, message: "Erro ao salvar pedido." });
+
+                                    const values = itens.map(i => [
+                                        pedidoId,
+                                        i.id_produto,
+                                        i.quantidade,
+                                        i.preco
+                                    ]);
+
+                                    db.query(
+                                        `INSERT INTO pedidos_itens (id_pedido, id_produto, quantidade, preco_unitario)
+                                         VALUES ?`,
+                                        [values]
+                                    );
+
+                                    db.query(
+                                        `UPDATE carrinho SET status = 'finalizado' WHERE id_carrinho = ?`,
+                                        [id_carrinho]
+                                    );
+
+                                    return res.json({
+                                        success: true,
+                                        pedidoId,
+                                        farmacias: listaFarmacias,
+                                        total
+                                    });
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+        }
+    );
+});
+
+
+/* ============================================================
+   HISTÓRICO DE PEDIDOS
+   ============================================================ */
+app.get("/api/pedidos/:id_usuario", (req, res) => {
+  const id = req.params.id_usuario;
+
+  db.query(
+    `
+    SELECT * FROM pedidos 
+    WHERE id_usuario = ? 
+    ORDER BY data_pedido DESC
+    `,
+    [id],
+    (err, pedidos) => {
+      if (pedidos.length === 0) return res.json([]);
+
+      const ids = pedidos.map(p => p.id_pedido);
+
+      db.query(
+        `
+        SELECT pi.*, p.nome 
+        FROM pedidos_itens pi
+        JOIN produtos p ON p.id_produto = pi.id_produto
+        WHERE id_pedido IN (?)
+        `,
+        [ids],
+        (err2, itens) => {
+          pedidos.forEach(p => {
+            p.itens = itens.filter(i => i.id_pedido === p.id_pedido);
+          });
+
+          res.json(pedidos);
+        }
+      );
+    }
+  );
+});
+
+/* ============================================================
+   FAVORITOS
+   ============================================================ */
+
+// Listar favoritos do usuário (com dados do produto)
+app.get("/api/favoritos/:id_usuario", (req, res) => {
+  const id = req.params.id_usuario;
+
+  db.query(
+    `SELECT f.id_favorito, p.id_produto, p.nome, p.preco, p.imagem, p.id_farmacia
+     FROM favoritos f
+     JOIN produtos p ON p.id_produto = f.id_produto
+     WHERE f.id_usuario = ?`,
+    [id],
+    (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Erro ao buscar favoritos." });
+      }
+      res.json(rows);
+    }
+  );
+});
+
+// Adicionar favorito
+app.post("/api/favoritos/adicionar", (req, res) => {
+  const { id_usuario, id_produto } = req.body;
+
+  if (!id_usuario || !id_produto) {
+    return res.json({ success: false, message: "Dados inválidos." });
+  }
+
+  db.query(
+    `INSERT INTO favoritos (id_usuario, id_produto)
+     VALUES (?, ?)
+     ON DUPLICATE KEY UPDATE criado_em = NOW()`,
+    [id_usuario, id_produto],
+    (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Erro ao adicionar favorito." });
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+// Remover favorito
+app.delete("/api/favoritos/remover", (req, res) => {
+  const { id_usuario, id_produto } = req.body;
+
+  if (!id_usuario || !id_produto) {
+    return res.json({ success: false, message: "Dados inválidos." });
+  }
+
+  db.query(
+    `DELETE FROM favoritos WHERE id_usuario = ? AND id_produto = ?`,
+    [id_usuario, id_produto],
+    (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Erro ao remover favorito." });
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+
+/* ============================================================
+   INICIAR SERVIDOR
+   ============================================================ */
+app.listen(3000, () => {
+  console.log('🚀 Servidor rodando em http://127.0.0.1:3000');
 });
