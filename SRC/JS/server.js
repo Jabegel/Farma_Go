@@ -237,30 +237,68 @@ app.post('/api/carrinho/adicionar', (req, res) => {
 });
 
 /* ============================================================
-   BUSCAR ITENS DO CARRINHO ABERTO DO USUÁRIO
+   BUSCAR ITENS DO CARRINHO — CRIA AUTOMATICAMENTE SE NÃO EXISTE
    ============================================================ */
 app.get('/api/carrinho/:id_usuario', (req, res) => {
-  db.query(
-    `
-      SELECT 
-        c.id_carrinho,
-        i.id_produto,
-        p.nome,
-        p.preco,
-        i.quantidade,
-        (i.quantidade * i.preco_unitario) AS subtotal
-      FROM carrinho c
-      LEFT JOIN carrinho_itens i ON c.id_carrinho = i.id_carrinho
-      LEFT JOIN produtos p ON i.id_produto = p.id_produto
-      WHERE c.id_usuario = ? AND c.status = 'aberto'
-    `,
-    [req.params.id_usuario],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: 'Erro no servidor' });
-      res.json(rows);
-    }
-  );
+
+    const id_usuario = req.params.id_usuario;
+
+    db.query(
+        `SELECT * FROM carrinho WHERE id_usuario = ? AND status = 'aberto' LIMIT 1`,
+        [id_usuario],
+        (err, carrinho) => {
+
+            if (err) return res.status(500).json({ error: "Erro ao buscar carrinho." });
+
+            if (carrinho.length === 0) {
+
+                db.query(
+                    `INSERT INTO carrinho (id_usuario, status) VALUES (?, 'aberto')`,
+                    [id_usuario],
+                    (err2, novo) => {
+                        if (err2) return res.status(500).json({ error: "Erro ao criar carrinho." });
+                        return res.json([]);
+                    }
+                );
+
+            } else {
+
+                const id_carrinho = carrinho[0].id_carrinho;
+
+                db.query(
+                    `
+                    SELECT 
+                        c.id_carrinho,
+                        i.id_produto,
+                        p.nome,
+                        i.quantidade,
+                        i.preco_unitario,
+                        CAST(i.quantidade * i.preco_unitario AS DECIMAL(10,2)) AS subtotal
+                    FROM carrinho c
+                    LEFT JOIN carrinho_itens i ON c.id_carrinho = i.id_carrinho
+                    LEFT JOIN produtos p ON i.id_produto = p.id_produto
+                    WHERE c.id_carrinho = ?
+                    `,
+                    [id_carrinho],
+                    (err3, itens) => {
+                        if (err3) return res.status(500).json({ error: "Erro ao buscar itens." });
+
+                        // CONVERTER strings para número antes de enviar
+                        itens = itens.map(i => ({
+                            ...i,
+                            preco_unitario: Number(i.preco_unitario),
+                            subtotal: Number(i.subtotal)
+                        }));
+
+                        res.json(itens);
+                    }
+                );
+            }
+        }
+    );
 });
+
+
 
 /* ============================================================
    AUMENTAR QUANTIDADE (BOTÃO "+")
