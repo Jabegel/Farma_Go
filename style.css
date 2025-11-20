@@ -782,3 +782,23 @@ body {
     border-radius: 12px;
     box-shadow: 0 0 10px #ddd;
 }
+
+.produto-info-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.fav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: #888;
+    transition: 0.2s;
+}
+
+.fav-btn:hover {
+    transform: scale(1.2);
+}
