@@ -200,3 +200,27 @@ CREATE TABLE IF NOT EXISTS cartoes (
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
 );
+
+
+
+CREATE TABLE pedidos (
+    id_pedido BIGINT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    pagamento VARCHAR(20),
+    id_cartao INT,
+    total DECIMAL(10,2),
+    data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE pedidos_itens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_pedido BIGINT NOT NULL,
+    id_produto INT NOT NULL,
+    quantidade INT NOT NULL,
+    preco_unitario DECIMAL(10,2),
+
+    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido)
+);
+
+
