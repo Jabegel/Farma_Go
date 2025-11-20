@@ -74,7 +74,14 @@ function toggleFavorito(produto) {
     if (existe) {
         favoritos = favoritos.filter(f => f.id_produto !== produto.id_produto);
     } else {
-        favoritos.push(produto);
+        favoritos.push({
+            id_produto: produto.id_produto,
+            nome: produto.nome,
+            preco: produto.preco,
+            imagem: produto.imagem,
+            id_farmacia: produto.id_farmacia   // ← ADICIONADO!
+        });
+
     }
 
     salvarFavoritosProdutos(favoritos);

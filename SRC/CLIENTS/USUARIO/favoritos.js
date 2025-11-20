@@ -21,20 +21,21 @@ function carregarFavoritos() {
 
     favoritos.forEach(prod => {
         lista.innerHTML += `
-            <div class="produto-card favorito-item">
+    <div class="produto-card favorito-item" onclick="irParaFarmacia(${prod.id_farmacia})">
 
-                <img src="/${prod.imagem}" class="produto-img">
+        <img src="/${prod.imagem}" class="produto-img">
 
-                <h3>${prod.nome}</h3>
+        <h3>${prod.nome}</h3>
 
-                <p>R$ ${Number(prod.preco).toFixed(2)}</p>
+        <p>R$ ${Number(prod.preco).toFixed(2)}</p>
 
-                <button class="btn-remover" onclick="removerFavorito(${prod.id_produto})">
-                    Remover ❤️
-                </button>
+        <button class="btn-remover" onclick="event.stopPropagation(); removerFavorito(${prod.id_produto})">
+            Remover ❤️
+        </button>
 
-            </div>
-        `;
+    </div>
+`;
+
     });
 }
 
@@ -57,3 +58,7 @@ function removerFavorito(id) {
 //  INICIAR
 // ==========================
 document.addEventListener("DOMContentLoaded", carregarFavoritos);
+
+function irParaFarmacia(id_farmacia) {
+    window.location.href = `farmacia_produtos.html?id=${id_farmacia}`;
+}
