@@ -23,7 +23,6 @@ db.connect(err => {
   else console.log('✅ Conectado ao MySQL!');
 });
 
-
 /* ============================================================
    LOGIN
    ============================================================ */
@@ -66,9 +65,8 @@ app.post('/login', (req, res) => {
   });
 });
 
-
 /* ============================================================
-   CADASTRO (organizado)
+   CADASTRO
    ============================================================ */
 app.post('/cadastro', (req, res) => {
   const { nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta } = req.body;
@@ -88,7 +86,6 @@ app.post('/cadastro', (req, res) => {
 
     const insertUser = 'INSERT INTO usuarios (nome, login, senha, tipo) VALUES (?, ?, ?, ?)';
     db.query(insertUser, [nomeExibicao, loginNome, senha, tipoConta], (err2, resultUser) => {
-
       if (err2) return res.status(500).json({ success: false, message: 'Erro ao criar usuário.' });
 
       const idUsuario = resultUser.insertId;
@@ -98,21 +95,23 @@ app.post('/cadastro', (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
-      db.query(insertCadastro,
+      db.query(
+        insertCadastro,
         [idUsuario, nomeExibicao, loginNome, cpf, email, senha, dataNascimento, tipoConta],
         (err3) => {
-
-          if (err3) return res.status(500).json({
-            success: false,
-            message: 'Erro ao salvar cadastro completo.'
-          });
+          if (err3) {
+            return res.status(500).json({
+              success: false,
+              message: 'Erro ao salvar cadastro completo.'
+            });
+          }
 
           return res.json({ success: true, message: 'Usuário cadastrado com sucesso!' });
-        });
+        }
+      );
     });
   });
 });
-
 
 /* ============================================================
    LISTAR PRODUTOS DA FARMÁCIA
@@ -124,21 +123,22 @@ app.get('/api/produtos', (req, res) => {
     return res.status(400).json({ error: 'Parâmetro farmacia necessário' });
   }
 
-  db.query(`SELECT * FROM produtos WHERE id_farmacia = ?`,
+  db.query(
+    'SELECT * FROM produtos WHERE id_farmacia = ?',
     [farmaciaId],
     (err, results) => {
-      if (err) return res.status(500).json({ error: "Erro no servidor" });
+      if (err) return res.status(500).json({ error: 'Erro no servidor' });
       res.json(results);
     }
   );
 });
 
-
 /* ============================================================
    LISTAR DADOS DA FARMÁCIA
    ============================================================ */
 app.get('/api/farmacia/:id', (req, res) => {
-  db.query(`SELECT * FROM farmacias WHERE id_farmacia = ?`,
+  db.query(
+    'SELECT * FROM farmacias WHERE id_farmacia = ?',
     [req.params.id],
     (err, result) => {
       if (err) return res.status(500).json({ error: 'Erro no servidor' });
@@ -147,58 +147,88 @@ app.get('/api/farmacia/:id', (req, res) => {
   );
 });
 
-
 /* ============================================================
    ADICIONAR AO CARRINHO
+   - Se já existir o produto no carrinho aberto, só soma a quantidade
    ============================================================ */
 app.post('/api/carrinho/adicionar', (req, res) => {
-
   const { id_usuario, id_produto, quantidade } = req.body;
 
   if (!id_usuario || !id_produto) {
-    return res.json({ success: false, message: "id_usuario e id_produto obrigatórios" });
+    return res.json({ success: false, message: 'id_usuario e id_produto obrigatórios' });
   }
 
+  const qtd = quantidade && quantidade > 0 ? quantidade : 1;
+
+  // 1) Buscar carrinho aberto do usuário (ou criar)
   db.query(
-    `SELECT id_carrinho FROM carrinho WHERE id_usuario = ? AND status = 'aberto' LIMIT 1`,
+    'SELECT id_carrinho FROM carrinho WHERE id_usuario = ? AND status = "aberto" LIMIT 1',
     [id_usuario],
     (err, rows) => {
+      if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar carrinho.' });
 
-      if (err) return res.status(500).json({ success: false });
+      const continuarComCarrinho = (id_carrinho) => {
+        // 2) Verificar se já existe esse produto no carrinho
+        db.query(
+          'SELECT quantidade FROM carrinho_itens WHERE id_carrinho = ? AND id_produto = ? LIMIT 1',
+          [id_carrinho, id_produto],
+          (errSel, itens) => {
+            if (errSel) {
+              return res.status(500).json({ success: false, message: 'Erro ao buscar itens do carrinho.' });
+            }
 
-      // função criar item
-      const criarItem = (id_carrinho) => {
-        db.query(`SELECT preco FROM produtos WHERE id_produto = ?`,
-          [id_produto],
-          (err2, p) => {
+            // 2.a) Se já existe: atualiza quantidade
+            if (itens.length > 0) {
+              db.query(
+                'UPDATE carrinho_itens SET quantidade = quantidade + ? WHERE id_carrinho = ? AND id_produto = ?',
+                [qtd, id_carrinho, id_produto],
+                (errUpd) => {
+                  if (errUpd) {
+                    return res.status(500).json({ success: false, message: 'Erro ao atualizar item.' });
+                  }
+                  return res.json({ success: true, message: 'Quantidade atualizada no carrinho!' });
+                }
+              );
+            } else {
+              // 2.b) Não existe ainda → inserir novo item
+              db.query(
+                'SELECT preco FROM produtos WHERE id_produto = ?',
+                [id_produto],
+                (errProd, p) => {
+                  if (errProd || p.length === 0) {
+                    return res.json({ success: false, message: 'Produto não encontrado.' });
+                  }
 
-            if (err2 || p.length === 0)
-              return res.json({ success: false, message: "Produto não encontrado" });
-
-            db.query(
-              `INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, preco_unitario)
-               VALUES (?, ?, ?, ?)`,
-              [id_carrinho, id_produto, quantidade || 1, p[0].preco],
-              (err3) => {
-
-                if (err3) return res.status(500).json({ success: false });
-
-                res.json({ success: true, message: "Item adicionado!" });
-              }
-            );
+                  db.query(
+                    `INSERT INTO carrinho_itens (id_carrinho, id_produto, quantidade, preco_unitario)
+                     VALUES (?, ?, ?, ?)`,
+                    [id_carrinho, id_produto, qtd, p[0].preco],
+                    (errIns) => {
+                      if (errIns) {
+                        return res.status(500).json({ success: false, message: 'Erro ao adicionar item.' });
+                      }
+                      return res.json({ success: true, message: 'Item adicionado ao carrinho!' });
+                    }
+                  );
+                }
+              );
+            }
           }
         );
       };
 
-      if (rows.length > 0)
-        criarItem(rows[0].id_carrinho);
-      else {
+      // Se já existe carrinho aberto, usa ele; senão cria
+      if (rows.length > 0) {
+        continuarComCarrinho(rows[0].id_carrinho);
+      } else {
         db.query(
-          `INSERT INTO carrinho (id_usuario, status) VALUES (?, 'aberto')`,
+          'INSERT INTO carrinho (id_usuario, status) VALUES (?, "aberto")',
           [id_usuario],
-          (err4, r) => {
-            if (err4) return res.status(500).json({ success: false });
-            criarItem(r.insertId);
+          (errCar, resultCar) => {
+            if (errCar) {
+              return res.status(500).json({ success: false, message: 'Erro ao criar carrinho.' });
+            }
+            continuarComCarrinho(resultCar.insertId);
           }
         );
       }
@@ -206,13 +236,12 @@ app.post('/api/carrinho/adicionar', (req, res) => {
   );
 });
 
-
 /* ============================================================
-   🔥 ROTA NOVA — BUSCAR ITENS DO CARRINHO
+   BUSCAR ITENS DO CARRINHO ABERTO DO USUÁRIO
    ============================================================ */
 app.get('/api/carrinho/:id_usuario', (req, res) => {
-
-  db.query(`
+  db.query(
+    `
       SELECT 
         c.id_carrinho,
         i.id_produto,
@@ -224,42 +253,109 @@ app.get('/api/carrinho/:id_usuario', (req, res) => {
       LEFT JOIN carrinho_itens i ON c.id_carrinho = i.id_carrinho
       LEFT JOIN produtos p ON i.id_produto = p.id_produto
       WHERE c.id_usuario = ? AND c.status = 'aberto'
-  `,
+    `,
     [req.params.id_usuario],
     (err, rows) => {
-
-      if (err) return res.status(500).json({ error: "Erro no servidor" });
-
+      if (err) return res.status(500).json({ error: 'Erro no servidor' });
       res.json(rows);
     }
   );
 });
 
+/* ============================================================
+   AUMENTAR QUANTIDADE (BOTÃO "+")
+   ============================================================ */
+app.post('/api/carrinho/addQtd', (req, res) => {
+  const { id_usuario, id_produto } = req.body;
 
-app.delete('/api/carrinho/remover', (req, res) => {
-    const { id_usuario, id_produto } = req.body;
+  if (!id_usuario || !id_produto) {
+    return res.json({ success: false, message: 'Dados inválidos.' });
+  }
 
-    if (!id_usuario || !id_produto) {
-        return res.json({ success: false, message: "Dados insuficientes." });
+  const sql = `
+    UPDATE carrinho_itens ci
+    JOIN carrinho c ON ci.id_carrinho = c.id_carrinho
+    SET ci.quantidade = ci.quantidade + 1
+    WHERE c.id_usuario = ? AND ci.id_produto = ? AND c.status = 'aberto'
+  `;
+
+  db.query(sql, [id_usuario, id_produto], (err) => {
+    if (err) {
+      console.error(err);
+      return res.json({ success: false, message: 'Erro ao atualizar quantidade.' });
     }
-
-    db.query(`
-        DELETE i FROM carrinho_itens i
-        JOIN carrinho c ON c.id_carrinho = i.id_carrinho
-        WHERE c.id_usuario = ? AND i.id_produto = ? AND c.status = 'aberto'
-    `, [id_usuario, id_produto],
-        (err, result) => {
-            if (err) return res.json({ success: false, message: "Erro no servidor." });
-
-            return res.json({ success: true, message: "Item removido!" });
-        }
-    );
+    res.json({ success: true });
+  });
 });
 
+/* ============================================================
+   DIMINUIR QUANTIDADE (BOTÃO "-")
+   - Só diminui se quantidade > 1 (se for 1, o front chama removerItem)
+   ============================================================ */
+app.post('/api/carrinho/removeQtd', (req, res) => {
+  const { id_usuario, id_produto } = req.body;
+
+  if (!id_usuario || !id_produto) {
+    return res.json({ success: false, message: 'Dados inválidos.' });
+  }
+
+  const sql = `
+    UPDATE carrinho_itens ci
+    JOIN carrinho c ON ci.id_carrinho = c.id_carrinho
+    SET ci.quantidade = ci.quantidade - 1
+    WHERE c.id_usuario = ? 
+      AND ci.id_produto = ? 
+      AND ci.quantidade > 1
+      AND c.status = 'aberto'
+  `;
+
+  db.query(sql, [id_usuario, id_produto], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.json({ success: false, message: 'Erro ao atualizar quantidade.' });
+    }
+    // se não afetou nenhuma linha, provavelmente já estava em 1
+    res.json({ success: true, affectedRows: result.affectedRows });
+  });
+});
+
+/* ============================================================
+   REMOVER ITEM DO CARRINHO
+   ============================================================ */
+function removerItemHandler(req, res) {
+  const { id_usuario, id_produto } = req.body;
+
+  if (!id_usuario || !id_produto) {
+    return res.json({ success: false, message: 'Dados insuficientes.' });
+  }
+
+  const sql = `
+    DELETE ci FROM carrinho_itens ci
+    JOIN carrinho c ON c.id_carrinho = ci.id_carrinho
+    WHERE c.id_usuario = ? 
+      AND ci.id_produto = ? 
+      AND c.status = 'aberto'
+  `;
+
+  db.query(sql, [id_usuario, id_produto], (err) => {
+    if (err) {
+      console.error(err);
+      return res.json({ success: false, message: 'Erro no servidor.' });
+    }
+
+    return res.json({ success: true, message: 'Item removido!' });
+  });
+}
+
+// rota nova usada pelo front atual
+app.delete('/api/carrinho/removerItem', removerItemHandler);
+
+// alias para compatibilidade com o que já existia
+app.delete('/api/carrinho/remover', removerItemHandler);
 
 /* ============================================================
    INICIAR SERVIDOR
    ============================================================ */
-app.listen(3000, () =>
-  console.log('🚀 Servidor rodando em http://127.0.0.1:3000')
-);
+app.listen(3000, () => {
+  console.log('🚀 Servidor rodando em http://127.0.0.1:3000');
+});

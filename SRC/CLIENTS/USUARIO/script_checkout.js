@@ -11,7 +11,7 @@ if (!usuario || !usuario.id) {
 
 
 // =============================================
-//  CARREGAR ITENS DO CARRINHO
+//  FUNÇÃO PRINCIPAL: CARREGAR CARRINHO
 // =============================================
 async function carregarCarrinho() {
 
@@ -32,27 +32,24 @@ async function carregarCarrinho() {
         let total = 0;
 
         itens.forEach(item => {
-
-            // Garantir que subtotal seja número
-            const subtotalNum = Number(item.subtotal);
-
-            total += subtotalNum;
+            total += item.subtotal;
 
             lista.innerHTML += `
-                <li>
-                    <span>${item.nome} (${item.quantidade}x)</span>
-                    <strong>R$ ${subtotalNum.toFixed(2)}</strong>
+                <li data-produto="${item.id_produto}">
+                    <span>${item.nome}</span>
 
-                    <!-- Botão remover -->
-                    <button class="btn-remove"
-                        onclick="removerItem(${item.id_produto})">
-                        Remover
-                    </button>
+                    <div class="qtd-controls">
+                        <button class="btn-menos" onclick="diminuirQtd(${item.id_produto}, ${item.quantidade})">-</button>
+                        <span class="qtd">${item.quantidade}</span>
+                        <button class="btn-mais" onclick="aumentarQtd(${item.id_produto})">+</button>
+                    </div>
+
+                    <strong>R$ ${item.subtotal.toFixed(2)}</strong>
                 </li>
             `;
         });
 
-        const taxaEntrega = 5;
+        const taxaEntrega = 10;
 
         lista.innerHTML += `
             <li>
@@ -75,55 +72,111 @@ async function carregarCarrinho() {
 
 
 // =============================================
-//  REMOVER ITEM DO CARRINHO
+//  🔼 AUMENTAR QUANTIDADE
 // =============================================
-async function removerItem(id_produto) {
-
-    if (!confirm("Remover este item?")) return;
+async function aumentarQtd(id_produto) {
 
     try {
-        const req = await fetch("http://127.0.0.1:3000/api/carrinho/remover", {
-            method: "DELETE",
+        const res = await fetch("http://127.0.0.1:3000/api/carrinho/addQtd", {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                id_usuario: usuario.id,
-                id_produto
-            })
+            body: JSON.stringify({ id_usuario: usuario.id, id_produto })
         });
 
-        const res = await req.json();
+        const data = await res.json();
 
-        if (res.success) {
-            alert("Item removido!");
-            carregarCarrinho(); // recarrega
-        } else {
-            alert(res.message || "Erro ao remover item.");
+        if (!data.success) {
+            alert("Erro ao adicionar quantidade.");
+            return;
         }
 
+        carregarCarrinho();
+
     } catch (err) {
-        console.error("Erro:", err);
-        alert("Falha ao remover item.");
+        console.log(err);
     }
 }
 
 
 
 // =============================================
-//  FINALIZAR PEDIDO
+//  🔽 DIMINUIR QUANTIDADE
 // =============================================
-async function finalizarPedido() {
-    alert("Pedido confirmado! (a rota será criada depois)");
+async function diminuirQtd(id_produto, qtdAtual) {
+
+    // Se estiver 1 → perguntar se quer remover
+    if (qtdAtual === 1) {
+        if (!confirm("Deseja remover este item do carrinho?")) return;
+
+        removerItem(id_produto);
+        return;
+    }
+
+    try {
+        const res = await fetch("http://127.0.0.1:3000/api/carrinho/removeQtd", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id_usuario: usuario.id, id_produto })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            alert("Erro ao diminuir quantidade.");
+            return;
+        }
+
+        carregarCarrinho();
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+
+
+// =============================================
+//  🗑 REMOVER ITEM DO CARRINHO
+// =============================================
+async function removerItem(id_produto) {
+
+    try {
+        const res = await fetch("http://127.0.0.1:3000/api/carrinho/removerItem", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id_usuario: usuario.id, id_produto })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            alert("Falha ao remover item.");
+            return;
+        }
+
+        carregarCarrinho();
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
+
+// =============================================
+//  CONFIRMAR PEDIDO
+// =============================================
+function finalizarPedido() {
+    alert("Pedido confirmado!");
+
     window.location.href = "pedido_confirmado.html";
 }
 
 
 
 // =============================================
-//  INICIAR AO CARREGAR A PÁGINA
+//  INICIAR
 // =============================================
 document.addEventListener("DOMContentLoaded", () => {
     carregarCarrinho();
-
-    const botao = document.querySelector("#btnConfirmarPedido");
-    if (botao) botao.addEventListener("click", finalizarPedido);
 });
