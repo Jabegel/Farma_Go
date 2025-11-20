@@ -109,9 +109,82 @@ async function removerEndereco(id_endereco) {
 
 
 
-// =============================================
+// ======================================================
+//  CARTÕES — LISTAR, PREVIEW E SELEÇÃO
+// ======================================================
+
+// esconder área quando voltar pro pix
+function ocultarCartoes() {
+    document.getElementById("cartoesBox").innerHTML = "";
+    document.getElementById("previewPagamento").innerHTML = "";
+}
+
+
+// carregar cartões do usuário
+async function carregarCartoes() {
+    const box = document.getElementById("cartoesBox");
+    const preview = document.getElementById("previewPagamento");
+
+    box.innerHTML = "Carregando cartões...";
+    preview.innerHTML = "";
+
+    try {
+        const res = await fetch(`http://127.0.0.1:3000/api/cartoes/${usuario.id}`);
+        const cartoes = await res.json();
+
+        if (!cartoes.length) {
+            box.innerHTML = `
+                <p>Nenhum cartão salvo.</p>
+                <a href="perfil_usuario.html">+ Adicionar cartão</a>
+            `;
+            return;
+        }
+
+        box.innerHTML = "";
+
+        cartoes.forEach(cartao => {
+            box.innerHTML += `
+                <div class="form-group" style="margin-top:4px;">
+                    <input type="radio" name="cartaoSelecionado" value="${cartao.id_cartao}"
+                        onclick="mostrarPreviewCartao('${cartao.nome_impresso}', '${cartao.numero_mascarado}', '${cartao.bandeira}')">
+                    <label>
+                        ${cartao.bandeira} •••• ${cartao.numero_mascarado}  
+                    </label>
+                </div>
+            `;
+        });
+
+    } catch (err) {
+        box.innerHTML = "<p>Erro ao carregar cartões.</p>";
+        console.log(err);
+    }
+}
+
+
+// preview do cartão selecionado
+function mostrarPreviewCartao(nome, numero, bandeira) {
+    const preview = document.getElementById("previewPagamento");
+
+    preview.innerHTML = `
+        <div style="
+            background:#f4f4f4; 
+            padding:10px; 
+            border-radius:8px; 
+            width:260px; 
+            box-shadow:0 0 4px #ccc;">
+            
+            <strong>${bandeira}</strong><br>
+            Número: •••• ${numero}<br>
+            Nome: ${nome}
+        </div>
+    `;
+}
+
+
+
+// ======================================================
 //  CARREGAR CARRINHO
-// =============================================
+// ======================================================
 async function carregarCarrinho() {
 
     const lista = document.querySelector(".checkout-list");
@@ -232,15 +305,34 @@ async function removerItem(id_produto) {
 
 
 
-// =============================================
+// ======================================================
 //  FINALIZAR PEDIDO
-// =============================================
+// ======================================================
 document.getElementById("btnConfirmarPedido").addEventListener("click", async () => {
+
+    const pagamento = document.querySelector('input[name="pagamento"]:checked').value;
+
+    let id_cartao = null;
+
+    if (pagamento === "cartao") {
+        const radio = document.querySelector('input[name="cartaoSelecionado"]:checked');
+
+        if (!radio) {
+            alert("Selecione um cartão para continuar.");
+            return;
+        }
+
+        id_cartao = radio.value;
+    }
 
     const req = await fetch("http://127.0.0.1:3000/api/pedido/finalizar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: usuario.id })
+        body: JSON.stringify({
+            id_usuario: usuario.id,
+            pagamento,
+            id_cartao
+        })
     });
 
     const res = await req.json();
@@ -250,12 +342,25 @@ document.getElementById("btnConfirmarPedido").addEventListener("click", async ()
         return;
     }
 
-    // Salvar dados para a página de confirmação
     localStorage.setItem("pedidoFinalizado", JSON.stringify(res));
 
     window.location.href = "pedido_confirmado.html";
 });
 
+
+
+// =============================================
+//  EVENTOS DE PAGAMENTO (PIX / CARTÃO)
+// =============================================
+document.querySelectorAll('input[name="pagamento"]').forEach(radio => {
+    radio.addEventListener("change", () => {
+        if (radio.value === "cartao") {
+            carregarCartoes();
+        } else {
+            ocultarCartoes();
+        }
+    });
+});
 
 
 

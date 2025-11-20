@@ -33,14 +33,22 @@
                 <h3 style="margin-top:2rem;">Forma de Pagamento</h3>
 
                 <div class="form-group">
-                    <input type="radio" name="pagamento" checked>
+                    <input type="radio" name="pagamento" value="pix" checked onclick="ocultarCartoes()">
                     <label>Pix</label>
                 </div>
 
                 <div class="form-group">
-                    <input type="radio" name="pagamento">
-                    <label>Cartão de Crédito (na entrega)</label>
+                    <input type="radio" name="pagamento" value="cartao" onclick="carregarCartoes()">
+                    <label>Cartão de Crédito</label>
                 </div>
+
+                <!-- cartões carregados -->
+                <div id="cartoesBox" style="margin-left: 25px; margin-top: 10px;"></div>
+
+                <!-- preview -->
+                <div id="previewPagamento" style="margin-top: 15px; font-size: 14px; color: #333;"></div>
+
+
             </section>
 
             <!-- ========== RESUMO DINÂMICO DO PEDIDO ========== -->
