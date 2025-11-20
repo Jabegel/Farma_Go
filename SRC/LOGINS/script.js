@@ -29,24 +29,30 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
     // Redirecionamento conforme tipo real do banco
     switch (data.tipo) {
-      case "cliente":
-        window.location.href = "../USUARIO/inicio_usuario.html";
-        break;
-      case "farmacia":
-        window.location.href = "./FARMACIA/inicio_farmacia.html";
-        break;
-      case "entregador":
-        window.location.href = "./ENTREGADOR/inicio_entregador.html";
-        break;
-      case "farmaceutico":
-        window.location.href = "./FARMACEUTICO/inicio_farmaceutico.html";
-        break;
-      case "admin":
-        window.location.href = "../MAX_ADMIN/inicio_admin.html";
-        break;
-      default:
-        alert("Tipo de usuário inválido.");
-    }
+  case "cliente":
+    window.location.href = "../CLIENTS/USUARIO/inicio_usuario.html";
+    break;
+
+  case "farmacia":
+    window.location.href = "../CLIENTS/FARMACIA/inicio_farmacia.html";
+    break;
+
+  case "entregador":
+    window.location.href = "../CLIENTS/ENTREGADOR/inicio_entregador.html";
+    break;
+
+  case "farmaceutico":
+    window.location.href = "../CLIENTS/FARMACEUTICO/inicio_farmaceutico.html";
+    break;
+
+  case "admin":
+    window.location.href = "../MAX_ADMIN/inicio_admin.html";
+    break;
+
+  default:
+    alert("Tipo de usuário inválido.");
+}
+
 
   } catch (error) {
     console.error("❌ Erro no login:", error);

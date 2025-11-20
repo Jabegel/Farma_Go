@@ -1,6 +1,19 @@
-// ===============================
-// PEGAR O ID DA FARMÁCIA DA URL
-// ===============================
+// =============================================
+//  🔐 VERIFICAR LOGIN DO USUÁRIO
+// =============================================
+const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+if (!usuario) {
+    alert("Você precisa estar logado!");
+    window.location.href = "../LOGINS/login.html";
+}
+
+console.log("Usuário logado:", usuario);
+
+
+// =============================================
+//  PEGAR O ID DA FARMÁCIA DA URL
+// =============================================
 document.addEventListener("DOMContentLoaded", () => {
 
     const params = new URLSearchParams(window.location.search);
@@ -16,9 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarProdutos(farmaciaId);
 });
 
-// ===============================
-// BUSCAR NOME DA FARMÁCIA
-// ===============================
+
+// =============================================
+//  BUSCAR NOME DA FARMÁCIA
+// =============================================
 function carregarNomeFarmacia(farmaciaId) {
     fetch(`http://127.0.0.1:3000/api/farmacia/${farmaciaId}`)
         .then(res => res.json())
@@ -32,9 +46,10 @@ function carregarNomeFarmacia(farmaciaId) {
         });
 }
 
-// ===============================
-// BUSCAR OS PRODUTOS DA FARMÁCIA
-// ===============================
+
+// =============================================
+//  BUSCAR OS PRODUTOS DA FARMÁCIA
+// =============================================
 function carregarProdutos(farmaciaId) {
 
     fetch(`http://127.0.0.1:3000/api/produtos?farmacia=${farmaciaId}`)
@@ -79,14 +94,13 @@ function carregarProdutos(farmaciaId) {
         });
 }
 
-// ===============================
-// ADICIONAR AO CARRINHO
-// ===============================
+
+// =============================================
+//  ADICIONAR ITEM AO CARRINHO
+// =============================================
 function adicionarCarrinho(idProduto) {
 
-    const idUsuario = localStorage.getItem("id_usuario");
-
-    if (!idUsuario) {
+    if (!usuario || !usuario.id) {
         alert("Você precisa estar logado!");
         return;
     }
@@ -95,17 +109,17 @@ function adicionarCarrinho(idProduto) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            id_usuario: Number(idUsuario),
+            id_usuario: usuario.id,
             id_produto: idProduto,
             quantidade: 1
         })
     })
         .then(res => res.json())
         .then(data => {
-            alert(data.message || "Item adicionado!");
+            alert(data.message || "Item adicionado ao carrinho!");
         })
         .catch(err => {
-            console.error("Erro ao adicionar:", err);
+            console.error("Erro ao adicionar ao carrinho:", err);
             alert("Erro ao adicionar ao carrinho.");
         });
 }

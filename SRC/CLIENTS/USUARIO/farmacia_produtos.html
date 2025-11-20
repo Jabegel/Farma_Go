@@ -1,46 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FarmaGo - Produtos</title>
-  <link rel="stylesheet" href="../style.css"> </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmaGo - Produtos da Farmácia</title>
+
+    <!-- CSS global -->
+    <link rel="stylesheet" href="/style.css">
+
+    <!-- CSS da farmácia -->
+    <link rel="stylesheet" href="/SRC/CLIENTS/FARMACIA/style_farma.css">
+</head>
+
 <body>
 
-  <header class="main-header">
+<header class="main-header">
     <a href="inicio_usuario.html" class="logo">FarmaGo</a>
     <nav>
-      <a href="carrinho_checkout.html">Meu Carrinho (2)</a>
-      <a href="../login.html">Sair</a>
+        <a href="carrinho_checkout.html">Meu Carrinho</a>
+        <a href="../LOGINS/login.html">Sair</a>
     </nav>
-  </header>
+</header>
 
-  <main class="container">
-    <h2>Produtos - Farmácia São José</h2>
-    
-    <div class="card-grid">
-      
-      <article class="card">
-        <img src="httpsdipirona.png" alt="Dipirona" class="card-image">
-        <div class="card-content">
-          <h3>Dipirona 500mg</h3>
-          <p class="product-price">R$ 12,50</p>
-          <a href="carrinho_checkout.html" class="btn btn-primary">Adicionar ao Carrinho</a>
-        </div>
-      </article>
-      
+<main class="container">
 
-      <article class="card">
-        <img src="httpsprotetor_solar.png" alt="Protetor Solar" class="card-image">
-        <div class="card-content">
-          <h3>Protetor Solar FPS 30</h3>
-          <p class="product-price">R$ 45,90</p>
-          <a href="carrinho_checkout.html" class="btn btn-primary">Adicionar ao Carrinho</a>
-        </div>
-      </article>
+    <!-- Nome da farmácia (carregado pelo JS) -->
+    <h2 id="nomeFarmacia">Carregando farmácia...</h2>
 
-    </div>
-  </main>
+    <!-- Produtos aparecem aqui -->
+    <div class="produtos-container"></div>
+
+</main>
+
+<!-- VERIFICA LOGIN AQUI -->
+<script src="script_usuario.js"></script>
+
+<!-- Carrega produtos -->
+<script src="../FARMACIA/script_farmacia.js"></script>
 
 </body>
 </html>
